@@ -11,7 +11,7 @@ angular.module('myApp')
           if (pinState === 0) {pinState = 1;}
           else {pinState = 0;}
 
-          Ardunio.setPins({13: pinState}).then(function(pins) {
+          Ardunio.setPins({9: pinState}).then(function(pins) {
             scope.pins = pins;
           });
         };

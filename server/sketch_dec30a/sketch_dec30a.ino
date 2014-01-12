@@ -24,9 +24,9 @@ boolean getPinState(int i);
 
 const char *HOST = "localhost:9000";
 Pin pins[11] = {
-  Pin(11, DIGITAL),
-  Pin(12, DIGITAL),
-  Pin(13, DIGITAL),
+  Pin(9, DIGITAL),
+  Pin(8, DIGITAL),
+  Pin(7, DIGITAL),
 };
 int numPins = 3;
 
@@ -99,6 +99,7 @@ boolean pins_handler(TinyWebServer& web_server) {
   web_server.send_error_code(200);
   web_server.send_content_type("application/javascript");
   web_server.end_headers();
+
   // UpdatePinsState();
   // Client& client = web_server.get_client();
   pinsToString(web_server);
@@ -137,9 +138,9 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
     Serial << "JSON data ->" << data << "<-\n";
 #endif
     aJsonObject *root = aJson.parse(data);
-    aJsonObject* pinName = aJson.getObjectItem(root, "13");
+    aJsonObject* pinName = aJson.getObjectItem(root, "9");
 
-    Serial << "13 is: [" << (pinName->valueint) << "]\n";
+    Serial << "9 is: [" << (pinName->valueint) << "]\n";
     int pinInt = atoi(pinName->name);
     if (pinName->valueint == 1){
       Serial << "Writing " << pinInt << " writing as LOW\n";
@@ -214,27 +215,6 @@ const char* ip_to_str(const uint8_t* ipAddr)
   return buf;
 }
 
-// Setup arduino pins
-int SetupArduino(Pin **newPins)
-{
-  int count = 3;
-
-//   newPins = (Pin **)realloc(newPins, sizeof(Pin *) * 11);
-//   for (int i = 0; i < 11; i++)
-//   {
-//     Pin *p = (Pin *)malloc(sizeof(Pin *));
-//     // Pin p = Pin(i+2);
-//     p->setPin(i+2);
-//     // p->SetIO(OUTPUT_TYPE);
-//     // p->SetState(LOW_STATE);
-//     // p->SetType(DIGITAL);
-//     newPins[i] = p;
-//     count++;
-//   }
-
-  return count;
-}
-
 void setup() {
 
 #if DEBUG
@@ -260,6 +240,8 @@ void setup() {
   for(int i=0; i < numPins; i++){
     pins[i].InitializeState();
   }
+
+  UpdatePinsState();
 
 #if DEBUG
   for(int i=0; i < numPins; i++){
@@ -303,7 +285,7 @@ void loop() {
 
 void UpdatePinsState() {
   for(int i=0; i<numPins; i++){
-    uint8_t stateInt = pins[i].getState();
+    uint8_t stateInt = digitalRead(pins[i].getPin());
     Serial << "Updating " << pins[i].getPin() << " state to " << stateInt << "\n";
   }
 }

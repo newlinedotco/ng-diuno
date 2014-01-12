@@ -19,7 +19,7 @@ Pin::~Pin()            {};
 
 void Pin::InitializeState()
 {
-  // pinMode(_pin, OUTPUT);
+  pinMode(_pin, OUTPUT);
   digitalWrite(_pin, LOW);
 }
 uint8_t Pin::getState()         {
