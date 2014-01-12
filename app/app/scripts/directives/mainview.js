@@ -6,8 +6,12 @@ angular.module('myApp')
       templateUrl: HOSTED_URL() + '/views/home.html',
       restrict: 'A',
       link: function(scope) {
+        var pinState = 0;
         scope.toggle = function() {
-          Ardunio.setPins({13: 1}).then(function(pins) {
+          if (pinState === 0) {pinState = 1;}
+          else {pinState = 0;}
+
+          Ardunio.setPins({13: pinState}).then(function(pins) {
             scope.pins = pins;
           });
         };

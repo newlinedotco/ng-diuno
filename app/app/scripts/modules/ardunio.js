@@ -39,7 +39,7 @@ angular.module('fsArdunio', [])
       url: 'http://10.0.1.32' + '/pins/digital',
       data: pins
     }).success(function(data) {
-      console.log(data);
+      console.log(data.pins.digital);
       d.resolve(data);
     }, function(err) {
       console.error('ERR', err);

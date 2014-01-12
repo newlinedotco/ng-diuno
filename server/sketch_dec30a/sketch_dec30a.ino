@@ -7,6 +7,7 @@
 // #include <SD.h>
 #include <string.h>
 #include <TinyWebServer.h>
+#include <aJSON.h>
 #include "./pin.h"
 
 boolean file_handler(TinyWebServer& web_server);
@@ -27,7 +28,7 @@ Pin pins[11] = {
   Pin(12, DIGITAL),
   Pin(13, DIGITAL),
 };
-int numPins;
+int numPins = 3;
 
 boolean has_filesystem = true;
 // const char *HOST = "fathomless-river-4136.herokuapp.com";
@@ -135,7 +136,18 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
 #if DEBUG
     Serial << "JSON data ->" << data << "<-\n";
 #endif
-    // aJsonObject *obj = aJson.parse(data);
+    aJsonObject *root = aJson.parse(data);
+    aJsonObject* pinName = aJson.getObjectItem(root, "13");
+
+    Serial << "13 is: [" << (pinName->valueint) << "]\n";
+    int pinInt = atoi(pinName->name);
+    if (pinName->valueint == 1){
+      Serial << "Writing " << pinInt << " writing as LOW\n";
+      digitalWrite(pinInt, LOW);
+    }else{
+      Serial << "Writing " << pinInt << " writing as HIGH\n";
+      digitalWrite(pinInt, HIGH);
+    }
   // }
 
   web_server.send_error_code(200);
@@ -231,8 +243,8 @@ void setup() {
   // pinMode(10, OUTPUT); // set the SS pin as an output (necessary!)
   // digitalWrite(10, HIGH); // but turn off the W5100 chip!
   pinMode(13, OUTPUT);
-  digitalWrite(13, HIGH);
   pinMode(12, OUTPUT);
+  pinMode(11, OUTPUT);
 
   /*
   char *number;
@@ -245,7 +257,9 @@ void setup() {
 #endif
 
   // numPins = SetupArduino(pins);
-  numPins = 3;
+  for(int i=0; i < numPins; i++){
+    pins[i].InitializeState();
+  }
 
 #if DEBUG
   for(int i=0; i < numPins; i++){
@@ -278,7 +292,7 @@ void setup() {
   web.begin();
 
 #if DEBUG  
-  Serial << F("Free RAM: ") << FreeRam() << "\n";
+  // Serial << F("Free RAM: ") << FreeRam() << "\n";
   Serial << F("Ready to accept HTTP requests.\n\n");
 #endif
 }
@@ -288,12 +302,15 @@ void loop() {
 }
 
 void UpdatePinsState() {
-  for(int i=0; i<sizeof(pins); i++){
-    pins[i].getState();
+  for(int i=0; i<numPins; i++){
+    uint8_t stateInt = pins[i].getState();
+    Serial << "Updating " << pins[i].getPin() << " state to " << stateInt << "\n";
   }
 }
 
 bool pinsToString(TinyWebServer& web_server) {
+  UpdatePinsState();
+
   web_server << F("{\"pins\": ");
   web_server << F("{\"digital\":{");
   int len = numPins;
@@ -363,6 +380,5 @@ void get_request_data(TinyWebServer& web_server, int length_str, char* str)
         str[i] = ch;
       }
     }
-    Serial << ";\n\n";
   }
 }
