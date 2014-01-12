@@ -5,7 +5,7 @@ angular.module('fsArdunio', [])
   var interceptor = function() {
     return {
       'request': function(req) {
-        req.data = JSON.stringify(req.data)+'\n';
+        // req.data = JSON.stringify(req.data)+'\n';
         return req;
       }
     };

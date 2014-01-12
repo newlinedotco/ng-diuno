@@ -1,11 +1,13 @@
+#define DEBUG 1
+
 #include <SPI.h>
+#include <Ardunio.h>
 #include <Ethernet.h>
 #include <Flash.h>
-#include <SD.h>
+// #include <SD.h>
+#include <string.h>
 #include <TinyWebServer.h>
 #include "./pin.h"
-
-#define DEBUG 1
 
 boolean file_handler(TinyWebServer& web_server);
 boolean index_handler(TinyWebServer& web_server);
@@ -13,71 +15,63 @@ boolean pins_handler(TinyWebServer& web_server);
 boolean digital_pin_handler(TinyWebServer& web_server);
 // String parse_path_string(String pathstring, int size);
 void parse_path_string(const char* str, int size, char **messages);
-String get_request_data(Client &client);
+void get_request_data(TinyWebServer &web_server, char *str);
 
 // HELPERS
 void setLedEnabled(int pin, int state);
 boolean getPinState(int i);
 
 const char *HOST = "localhost:9000";
-Pin** pins;
+Pin pins[11] = {
+  Pin(11, DIGITAL),
+  Pin(12, DIGITAL),
+  Pin(13, DIGITAL),
+};
 int numPins;
 
 boolean has_filesystem = true;
 // const char *HOST = "fathomless-river-4136.herokuapp.com";
-Sd2Card card; 
-SdVolume volume;
-SdFile root;
-SdFile file;
-
-// HARDWARE STATES
-// temporary
-// int digitalPins[] = { 13, 12, NULL };
-// int digitalPinStates[] = { LOW, LOW, NULL };
+// Sd2Card card; 
+// SdVolume volume;
+// SdFile root;
+// SdFile file;
 
 static uint8_t mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
 // Don't forget to modify the IP to an available one on your home network
 byte ip[] = { 10, 0, 1, 32 };
 
-TinyWebServer::PathHandler handlers[] = {
-  {"/pins/" "*", TinyWebServer::POST, &digital_pin_handler},
-  {"/pins", TinyWebServer::GET, &pins_handler},
-  {"/", TinyWebServer::GET, &index_handler },
-  {NULL},
-};
+// boolean file_handler(TinyWebServer& web_server) {
+//   char* filename = TinyWebServer::get_file_from_path(web_server.get_path());
+//   Serial << "Reading from filename: " << filename;
+//   send_file_name(web_server, filename);
+//   free(filename);
+//   return true;
+// }
 
-boolean file_handler(TinyWebServer& web_server) {
-  char* filename = TinyWebServer::get_file_from_path(web_server.get_path());
-  Serial << "Reading from filename: " << filename;
-  send_file_name(web_server, filename);
-  free(filename);
-  return true;
-}
-
-void send_file_name(TinyWebServer& web_server, const char* filename) {
-  if (!filename) {
-    web_server.send_error_code(404);
-    web_server.end_headers();
-    web_server << F("Could not parse URL");
-  } else {
-    TinyWebServer::MimeType mime_type
-      = TinyWebServer::get_mime_type_from_filename(filename);
-    web_server.send_error_code(200);
-    if (file.open(&root, filename, O_READ)) {
-    web_server.send_content_type(mime_type);
-    web_server.end_headers();
-      Serial << F("Read file "); Serial.println(filename);
-      web_server.send_file(file);
-      file.close();
-    } else {
-    web_server.send_content_type("text/plain");
-    web_server.end_headers();
-    Serial << F("Could not find file: "); Serial.println(filename);
-      web_server << F("Could not find file: ") << filename << "\n";
-    }
-  }
-}
+// void send_file_name(TinyWebServer& web_server, const char* filename) {
+//   if (!filename) {
+//     web_server.send_error_code(404);
+//     web_server.end_headers();
+//     web_server << F("Could not parse URL");
+//   } else {
+//     TinyWebServer::MimeType mime_type
+//       = TinyWebServer::get_mime_type_from_filename(filename);
+//     web_server.send_error_code(200);
+//     if (file.open(&root, filename, O_READ)) {
+//     web_server.send_content_type(mime_type);
+//     web_server.end_headers();
+//       Serial << F("Read file "); Serial.println(filename);
+//       web_server.send_file(file);
+//       file.close();
+//     } else {
+//     web_server.send_content_type("text/plain");
+//     web_server.end_headers();
+//     Serial << F("Could not find file: "); Serial.println(filename);
+//       web_server << F("Could not find file: ") << filename << "\n";
+//     }
+//   }
+// }
 
 /*
 boolean index_handler(TinyWebServer& web_server) {
@@ -102,7 +96,7 @@ boolean index_handler(TinyWebServer& web_server) {
 // GET /pins
 boolean pins_handler(TinyWebServer& web_server) {
   web_server.send_error_code(200);
-  // web_server.send_content_type("application/javascript");
+  web_server.send_content_type("application/javascript");
   web_server.end_headers();
   // UpdatePinsState();
   // Client& client = web_server.get_client();
@@ -112,31 +106,50 @@ boolean pins_handler(TinyWebServer& web_server) {
 
 // POST /dpin/int
 boolean digital_pin_handler(TinyWebServer& web_server) {
+  // handle pins
   // GET PATH
   String pathstring = web_server.get_path();
-  int size = count_forward_slashes(pathstring);
-  char** parsed = (char**)malloc(sizeof(char *) * size);
-  parse_path_string(pathstring.c_str(), size, parsed);
+#if DEBUG
+  Serial << F("Parsed page from ") << pathstring << "\n";
+#endif
 
-  if (strcmp(parsed[1], "digital") == 0) {
-    Serial << "Digital\n";
+  int size = count_forward_slashes(pathstring);
+#if DEBUG
+  Serial << "Count: " << size << "\n";
+#endif
+  // char** parsed = (char**)malloc(sizeof(char *) * size);
+  // parse_path_string(pathstring.c_str(), size, parsed);
+
+  // if (strcmp(parsed[1], "digital") == 0) {
+    // Serial << "Digital " << parsed[0] << "\n";
     // READ DATA
-    Client& client = web_server.get_client();
-    String data = get_request_data(client);
+    // const char* length_str = web_server.get_header_value("Content-Length");
+    // Client& client = web_server.get_client();
+    const char* length_str = web_server.get_header_value("Content-Length");
+    int len = atoi(length_str);
+
+    char* data = (char*)malloc(len);
+    if (data) memset(data, 0, sizeof(len));
+    get_request_data(web_server, len, data);
     // DIGITAL
-    Serial << "digital\n" << data << "\n";
-  }
+#if DEBUG
+    Serial << "JSON data ->" << data << "<-\n";
+#endif
+    // aJsonObject *obj = aJson.parse(data);
+  // }
 
   web_server.send_error_code(200);
   web_server.send_content_type("application/javascript");
   web_server.end_headers();
 
-  web_server << "{}";
+  // web_server << "{}";
+  pinsToString(web_server);
 
-  for(int j=0; j<size; j++){
-    free(parsed[j]);
-  }
-  free(parsed);
+  // for(int j=0; j<size; j++){
+  //   free(parsed[j]);
+  // }
+  // free(parsed);
+  free(data);
   // String pathstring = web_server.get_path();
   // String pinStr;
   // boolean keep = false;
@@ -169,8 +182,17 @@ boolean getPinState(int i) {
   return true;
 }
 
-boolean has_ip_address = false;
-const char* headers[] = {"Access-Control-Allow-Origin", NULL};
+TinyWebServer::PathHandler handlers[] = {
+  {"/pins/" "*", TinyWebServer::POST, &digital_pin_handler},
+  {"/pins", TinyWebServer::GET, &pins_handler},
+  {"/", TinyWebServer::GET, &index_handler },
+  {NULL},
+};
+
+const char* headers[] = {
+  "Content-Length",
+  NULL
+};
 TinyWebServer web = TinyWebServer(handlers, headers);
 
 const char* ip_to_str(const uint8_t* ipAddr)
@@ -183,19 +205,20 @@ const char* ip_to_str(const uint8_t* ipAddr)
 // Setup arduino pins
 int SetupArduino(Pin **newPins)
 {
-  int count = 0;
+  int count = 3;
 
-  newPins = (Pin **)realloc(newPins, sizeof(Pin *) * 11);
-  for (int i = 0; i < 11; i++)
-  {
-    Pin *p = (Pin *)malloc(sizeof(Pin *));
-    p->setPin(i+2);
-    // p->SetIO(OUTPUT_TYPE);
-    // p->SetState(LOW_STATE);
-    // p->SetType(DIGITAL);
-    newPins[i] = p;
-    count++;
-  }
+//   newPins = (Pin **)realloc(newPins, sizeof(Pin *) * 11);
+//   for (int i = 0; i < 11; i++)
+//   {
+//     Pin *p = (Pin *)malloc(sizeof(Pin *));
+//     // Pin p = Pin(i+2);
+//     p->setPin(i+2);
+//     // p->SetIO(OUTPUT_TYPE);
+//     // p->SetState(LOW_STATE);
+//     // p->SetType(DIGITAL);
+//     newPins[i] = p;
+//     count++;
+//   }
 
   return count;
 }
@@ -203,12 +226,13 @@ int SetupArduino(Pin **newPins)
 void setup() {
 
 #if DEBUG
-Serial.begin(9600);
+  Serial.begin(9600);
 #endif
   // pinMode(10, OUTPUT); // set the SS pin as an output (necessary!)
   // digitalWrite(10, HIGH); // but turn off the W5100 chip!
-  // pinMode(13, OUTPUT);
-  // pinMode(12, OUTPUT);
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH);
+  pinMode(12, OUTPUT);
 
   /*
   char *number;
@@ -220,11 +244,12 @@ Serial.begin(9600);
   Serial << F("Setting up pins...\n");
 #endif
 
-  numPins = SetupArduino(pins);
+  // numPins = SetupArduino(pins);
+  numPins = 3;
 
 #if DEBUG
   for(int i=0; i < numPins; i++){
-    pins[i]->Print();
+    pins[i].Print();
   }
 #endif
 
@@ -264,20 +289,20 @@ void loop() {
 
 void UpdatePinsState() {
   for(int i=0; i<sizeof(pins); i++){
-    pins[i]->getState();
+    pins[i].getState();
   }
 }
 
 bool pinsToString(TinyWebServer& web_server) {
   web_server << F("{\"pins\": ");
   web_server << F("{\"digital\":{");
-  int len = 3;
+  int len = numPins;
   for(int i=0; i<len; i++){
     // digitalPins[i]
     web_server << F("\"");
-    web_server << pins[i]->getPin();
+    web_server << pins[i].getPin();
     web_server << F("\":\"");
-    web_server << pins[i]->getState();
+    web_server << pins[i].getState();
     web_server << F("\"");
     if ((i+1) < len) web_server << F(",");
   }
@@ -304,6 +329,9 @@ void parse_path_string(const char* cStr, int size, char** messages) {
   char* str = strdup(cStr);
   char *p;
   int i = 0;
+#if DEBUG
+    Serial << "string: " << str << "\n";
+#endif
 
   for(str = strtok_r(str,"/",&p); str; str = strtok_r(NULL, "/", &p))
   {
@@ -311,20 +339,30 @@ void parse_path_string(const char* cStr, int size, char** messages) {
     char *msg = (char *)malloc((len + 1) * sizeof(char)); // sizeof(char) == 1
     strncpy(msg, str, len + 1);
     // char *msg = strdup(str);
+#if DEBUG
+    Serial << "Writing " << i << " as " << msg << " (" << str << ")\n";
+#endif
     messages[i] = msg;
     i++;
   }
 }
 
-String get_request_data(Client &client)
+void get_request_data(TinyWebServer& web_server, int length_str, char* str)
 {
-  String str;
+  char ch;
+  Client& client = web_server.get_client();
   if(client.available()) {
-    for(char ch = (char)client.read(); ch != NULL && ch != '\n'; ch = (char)client.read()) {
-      Serial << ch;
-      str += ch;
+    for(int i=0; i<length_str; i++){
+      ch = (char)client.read();
+    // }
+    // for(char ch = (char)client.read(); ch != NULL && ch != '\n'; ch = (char)client.read()) {
+      if (ch != NULL && ch != '\n') {
+#if DEBUG
+        Serial << ch;
+#endif
+        str[i] = ch;
+      }
     }
-    Serial << "--------------------------------\n";
+    Serial << ";\n\n";
   }
-  return str;
 }
