@@ -18,10 +18,6 @@ boolean digital_pin_handler(TinyWebServer& web_server);
 void parse_path_string(const char* str, int size, char **messages);
 void get_request_data(TinyWebServer &web_server, char *str);
 
-// HELPERS
-void setLedEnabled(int pin, int state);
-boolean getPinState(int i);
-
 const char *HOST = "localhost:9000";
 Pin pins[11] = {
   Pin(9, DIGITAL),
@@ -30,7 +26,6 @@ Pin pins[11] = {
 };
 int numPins = 3;
 
-boolean has_filesystem = true;
 // const char *HOST = "fathomless-river-4136.herokuapp.com";
 // Sd2Card card; 
 // SdVolume volume;
@@ -181,7 +176,6 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
   web_server.send_content_type("application/javascript");
   web_server.end_headers();
 
-  // web_server << "{}";
   pinsToString(web_server);
 
   // for(int j=0; j<size; j++){
@@ -190,18 +184,6 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
   // free(parsed);
   free(data);
 
-  return true;
-}
-
-// LED helpers
-void setLedEnabled(int pin, int state) {
-  // digitalPinStates[pin] = state;
-  Serial << "Writing " << pin << " as " << state << "\n";
-  // digitalWrite(pin, state);
-  // delay(1000);
-  // digitalWrite(pin, !state);
-}
-boolean getPinState(int i) { 
   return true;
 }
 
@@ -261,12 +243,10 @@ void setup() {
 
   // if (!card.init(SPI_FULL_SPEED, 4)) {
   //   Serial << F("card failed\n");
-  //   has_filesystem = false;
   // }
   // // initialize a FAT volume
   // if (!volume.init(&card)) {
   //   Serial << F("vol.init failed!\n");
-  //   has_filesystem = false;
   // }
   // root.openRoot(volume);
   // root.ls();
@@ -293,10 +273,9 @@ void loop() {
   web.process();
 }
 
+// Iterate over pins and update each of their states
 void UpdatePinsState() {
-  for(int i=0; i<numPins; i++){
-    pins[i].getState();
-  }
+  for(int i=0; i<numPins; i++){ pins[i].getState(); }
 }
 
 bool pinsToString(TinyWebServer& web_server) {
