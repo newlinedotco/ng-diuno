@@ -6,10 +6,16 @@ angular.module('myApp')
       templateUrl: HOSTED_URL() + '/views/home.html',
       restrict: 'A',
       link: function(scope) {
-        Arduino.getPins()
-        .then(function(pins) {
-          scope.pins = pins;
-        });
+        
+
+        scope.refresh = function() {
+          Arduino.getPins()
+          .then(function(pins) {
+            scope.pins = pins;
+          });
+        };
+
+        scope.refresh(); // Kick it off
       }
     };
   });

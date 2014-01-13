@@ -148,21 +148,31 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
     aJsonObject *pinObj;
     aJsonObject* pinName;
     aJsonObject* pinValue;
+    aJsonObject* pinMode;
 
     for(int i=0; i<arrSize; i++){
       pinObj = aJson.getArrayItem(pins, i);
 
       pinName = aJson.getObjectItem(pinObj, "pin");
       pinValue = aJson.getObjectItem(pinObj, "value");
+      pinMode = aJson.getObjectItem(pinObj, "mode");
 
 #if DEBUG
       Serial << (pinName->valueint) << " is: [" << (pinValue->valueint) << "]\n";
 #endif
-
-      if (pinValue->valueint == 1){
-        digitalWrite(pinName->valueint, LOW);
-      }else{
-        digitalWrite(pinName->valueint, HIGH);
+      
+      Pin *p = select_pin(pinName->valueint);
+      if (pinMode != NULL) { 
+#if DEBUG
+      Serial << "Setting pin " << (pinName->valueint) << " to pinMode: " << (pinMode->valueint) << "\n";
+#endif
+        p->setMode(pinMode->valueint); 
+      }
+      if (pinValue != NULL) {
+#if DEBUG
+      Serial << "Setting pin " << (pinName->valueint) << " to pinValue: " << (pinValue->valueint) << "\n";
+#endif      
+        p->setState(pinValue->valueint == 1 ? HIGH : LOW);
       }
     }
 
@@ -179,23 +189,7 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
   // }
   // free(parsed);
   free(data);
-  // String pathstring = web_server.get_path();
-  // String pinStr;
-  // boolean keep = false;
 
-  // int pin = atoi(pinStr.c_str());
-  // boolean pinState = getPinState(pin);
-  // Serial << "Pinstate (" << pin << "): " << pinState << "\n";
-  // setLedEnabled(pin, !pinState);
-  // pinState = !pinState;
-
-  // pinsToString(web_server);
-
-  // web_server << F("{\"pin\":\"");
-  // web_server << pin;
-  // web_server << F("\",\"state\":");
-  // web_server << pinState;
-  // web_server << F("}");
   return true;
 }
 
@@ -301,8 +295,7 @@ void loop() {
 
 void UpdatePinsState() {
   for(int i=0; i<numPins; i++){
-    uint8_t stateInt = digitalRead(pins[i].getPin());
-    Serial << "Updating " << pins[i].getPin() << " state to " << stateInt << "\n";
+    pins[i].getState();
   }
 }
 
@@ -372,11 +365,15 @@ void get_request_data(TinyWebServer& web_server, int length_str, char* str)
     // }
     // for(char ch = (char)client.read(); ch != NULL && ch != '\n'; ch = (char)client.read()) {
       if (ch != NULL && ch != '\n') {
-#if DEBUG
-        Serial << ch;
-#endif
         str[i] = ch;
       }
     }
   }
+}
+
+Pin *select_pin(uint8_t pinNumber) {
+  for(int i=0; i<numPins; i++){
+    if (pins[i].getPin() == pinNumber) return &pins[i];
+  }
+  return NULL;
 }

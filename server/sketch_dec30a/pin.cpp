@@ -22,7 +22,7 @@ void Pin::InitializeState()
   pinMode(_pin, OUTPUT);
   digitalWrite(_pin, LOW);
 }
-uint8_t Pin::getState()         {
+uint8_t Pin::getState(){
   return _digitalState = digitalRead(_pin);
 }
 uint8_t Pin::setState(uint8_t state) {
@@ -31,6 +31,11 @@ uint8_t Pin::setState(uint8_t state) {
 }
 uint8_t Pin::getPin()           { return _pin; }
 void    Pin::setPin(uint8_t p)  { _pin = p; }
+
+void    Pin::setMode(uint8_t t) {
+  _mode = t;
+  pinMode(_pin, t == 0 ? INPUT : OUTPUT);
+}
 
 void Pin::Print() {
   Serial << F("Pin \n");

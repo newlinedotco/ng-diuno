@@ -9,23 +9,39 @@ angular.module('myApp')
         'ngModel': '='
       },
       link: function postLink(scope) {
-        var pinState = scope.value;
+        var pinState = scope.ngModel.value;
+
+        scope.changeMode = function() {
+          Arduino.setPins({
+            'pins': [{
+              pin: scope.ngModel.pin,
+              mode: 0 // input
+            }]
+          }).then(function(pins) {
+            console.log('pins', pins);
+          });
+        };
 
         scope.toggle = function() {
           if (pinState === 0) {pinState = 1;}
           else {pinState = 0;}
 
-          console.log(scope.ngModel);
           var data = {
             'pins': [{
               pin: scope.ngModel.pin,
               value: pinState
             }]
           };
-          console.log(data);
           Arduino.setPins(data)
           .then(function() {
             // scope.pins = pins;
+            for (var i = 0; i < data.pins.length; i++) {
+              var pin = data.pins[i];
+              if (pin.pin === scope.ngModel.pin) {
+                scope.ngModel.pin = pin.pin;
+                scope.ngModel.value = pin.value;
+              }
+            }
           });
         };
 

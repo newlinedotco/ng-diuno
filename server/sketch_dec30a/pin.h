@@ -3,14 +3,14 @@
 
 // PINS
 enum PinType {DIGITAL, ANALOG};
-enum PinSetting { INPUT_TYPE, OUTPUT_TYPE};
 enum PinState { HIGH_STATE, LOW_STATE };
 
 class Pin {
 private:
   uint8_t _pin;
   uint8_t _digitalState;
-  PinType _type;
+  uint8_t _type;
+  uint8_t _mode;
   // PinSetting setting;
 public:
   Pin();
@@ -22,6 +22,8 @@ public:
   void    setPin(uint8_t);
   uint8_t getState();
   uint8_t setState(uint8_t state);
+
+  void    setMode(uint8_t);
 
   void InitializeState();
   void Print();
