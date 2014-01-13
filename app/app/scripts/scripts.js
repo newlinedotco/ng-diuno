@@ -28,10 +28,11 @@
   createLinkTag('styles/main.css');
 
   var arr = [
-    'scripts/modules/ardunio.js',
+    'scripts/modules/arduino.js',
     'scripts/app.js',
     'scripts/controllers/main.js',
-    'scripts/directives/mainview.js'
+    'scripts/directives/mainview.js',
+    'scripts/directives/digitalpin.js'
   ];
 
   createScriptTag('bower_components/angular/angular.js');

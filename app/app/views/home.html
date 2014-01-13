@@ -1,4 +1,3 @@
 <div class="container">
-  <a ng-click="toggle(12)" class="btn btn-primary">Toggle</a>
-  <pre>{{ pins | json }}</pre>
+<div ng-repeat="pin in pins.digital" digital-pin ng-model="pin"></div>
 </div>

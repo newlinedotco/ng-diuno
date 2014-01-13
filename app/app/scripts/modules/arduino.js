@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('fsArdunio', [])
+angular.module('fsArduino', [])
 .config(function($httpProvider) {
   var interceptor = function() {
     return {
@@ -12,7 +12,7 @@ angular.module('fsArdunio', [])
   };
   $httpProvider.interceptors.push(interceptor);
 })
-.service('Ardunio', function($q, $http) {
+.service('Arduino', function($q, $http) {
   this.pins = {
     digital: {},
     analog: {}
@@ -39,7 +39,7 @@ angular.module('fsArdunio', [])
       url: 'http://10.0.1.32' + '/pins/digital',
       data: pins
     }).success(function(data) {
-      console.log(data.pins.digital);
+      console.log(data.digital);
       d.resolve(data);
     }, function(err) {
       console.error('ERR', err);

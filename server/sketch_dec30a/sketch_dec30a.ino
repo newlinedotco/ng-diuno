@@ -137,20 +137,36 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
 #if DEBUG
     Serial << "JSON data ->" << data << "<-\n";
 #endif
-    aJsonObject *root = aJson.parse(data);
-    aJsonObject* pinName = aJson.getObjectItem(root, "9");
+    aJsonObject* root = aJson.parse(data);
+    aJsonObject* pins = aJson.getObjectItem(root, "pins");
 
-    Serial << "9 is: [" << (pinName->valueint) << "]\n";
-    int pinInt = atoi(pinName->name);
-    if (pinName->valueint == 1){
-      Serial << "Writing " << pinInt << " writing as LOW\n";
-      digitalWrite(pinInt, LOW);
-    }else{
-      Serial << "Writing " << pinInt << " writing as HIGH\n";
-      digitalWrite(pinInt, HIGH);
+    int arrSize = aJson.getArraySize(pins);
+#if DEBUG
+    Serial << "Array of pins: " << arrSize << "\n";
+#endif
+
+    aJsonObject *pinObj;
+    aJsonObject* pinName;
+    aJsonObject* pinValue;
+
+    for(int i=0; i<arrSize; i++){
+      pinObj = aJson.getArrayItem(pins, i);
+
+      pinName = aJson.getObjectItem(pinObj, "pin");
+      pinValue = aJson.getObjectItem(pinObj, "value");
+
+#if DEBUG
+      Serial << (pinName->valueint) << " is: [" << (pinValue->valueint) << "]\n";
+#endif
+
+      if (pinValue->valueint == 1){
+        digitalWrite(pinName->valueint, LOW);
+      }else{
+        digitalWrite(pinName->valueint, HIGH);
+      }
     }
-  // }
 
+  aJson.deleteItem(root);
   web_server.send_error_code(200);
   web_server.send_content_type("application/javascript");
   web_server.end_headers();
@@ -293,20 +309,20 @@ void UpdatePinsState() {
 bool pinsToString(TinyWebServer& web_server) {
   UpdatePinsState();
 
-  web_server << F("{\"pins\": ");
-  web_server << F("{\"digital\":{");
+  // web_server << F("{\"pins\": ");
+  web_server << F("{\"digital\":[");
   int len = numPins;
   for(int i=0; i<len; i++){
     // digitalPins[i]
-    web_server << F("\"");
+    web_server << F("{\"pin\":");
     web_server << pins[i].getPin();
-    web_server << F("\":\"");
+    web_server << F(",\"value\":");
     web_server << pins[i].getState();
-    web_server << F("\"");
+    web_server << F("}");
     if ((i+1) < len) web_server << F(",");
   }
-  web_server << F("}}");
-  web_server << F("}");
+  web_server << F("]}");
+  // web_server << F("}");
   return true;
 }
 

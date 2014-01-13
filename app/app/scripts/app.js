@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('myApp', [
-  'fsArdunio',
+  'fsArduino',
   'ngRoute'
 ])
 .constant('HOSTED_URL', function() {
