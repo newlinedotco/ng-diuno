@@ -34,7 +34,6 @@ angular.module('fsArduino', [])
         if (typeof(p.value) !== 'undefined') {str += 'v' + p.value;}
         if (typeof(p.action) !== 'undefined') {str += 'a' + actions[p.action];}
       }
-      console.log(str, str.length);
       return str;
     };
     var service = {
@@ -55,6 +54,14 @@ angular.module('fsArduino', [])
           headers: {'X-Action-Len': strAction.length}
         }).then(function(data) {
           return data.data;
+        });
+      },
+      subscribeToPin: function(pin) {
+        return $http({
+          method: 'GET',
+          url: rootUrl + '/pins/subscribe/' + pin
+        }).then(function(data) {
+          console.log('DATA FROM SUBSCRIBE',data);
         });
       }
     };

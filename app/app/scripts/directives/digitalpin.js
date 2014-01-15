@@ -21,8 +21,8 @@ angular.module('myApp')
           Arduino.setPins([{
               pin: scope.ngModel.pin,
               mode: 0 // input
-            }]).then(function(pins) {
-              console.log('pins', pins);
+            }]).then(function(data) {
+              scope.ngModel = findByPinNumber(data.pins);
             });
         };
 
@@ -34,6 +34,13 @@ angular.module('myApp')
               console.log('pins', findByPinNumber(data.pins));
               scope.ngModel = findByPinNumber(data.pins);
             });
+        };
+
+        scope.subscribe = function() {
+          Arduino.subscribeToPin(scope.ngModel.pin)
+          .then(function(data) {
+            console.log('subscribe', data);
+          });
         };
 
         scope.toggle = function() {

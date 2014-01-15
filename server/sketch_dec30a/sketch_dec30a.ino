@@ -14,6 +14,7 @@
 boolean file_handler(TinyWebServer& web_server);
 boolean index_handler(TinyWebServer& web_server);
 boolean pins_handler(TinyWebServer& web_server);
+boolean subscribe_handler(TinyWebServer& web_server);
 // boolean setup_handler(TinyWebServer& web_server);
 boolean digital_pin_handler(TinyWebServer& web_server);
 // boolean analog_pin_handler(TinyWebServer& web_server);
@@ -33,6 +34,9 @@ Pin pins[11] = {
 };
 
 OneWire ds(7);
+
+Client* subscribers[1];
+int num_subscribers = 0;
 
 int numPins = 3;
 
@@ -80,23 +84,13 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
     Serial.print(len);
     Serial.print(F(")\n"));
 #endif
-    // aJsonObject* root = aJson.parse(data);
-    // free(data);
-    // aJsonObject* pins = aJson.getObjectItem(root, "pins");
-
-    // int arrSize = aJson.getArraySize(pins);
 
     int sLen = strlen(data);
 
     char ch;
-    int valueInt, pinInt, actionInt;
+    int valueInt, pinInt, actionInt, modeInt;
     ActionTypes actionT;
     float currTemp;
-    // aJsonObject* pinObj;
-    // aJsonObject* pinName;
-    // aJsonObject* pinValue;
-    // aJsonObject* pinMode;
-    // aJsonObject* pinAction;
 
     int i = 0;
     while(i < sLen) {
@@ -147,11 +141,14 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
                 }
                 break;
               case 'm':
+                i++;
+                modeInt = (int)(data[i] - '0');
 #if DEBUG
                 Serial.print(F("Mode: "));
-                // Serial.print();
+                Serial.print(modeInt);
                 Serial.print(F("\n"));
 #endif  
+                p->setMode(modeInt); 
                 break;
               default:
 #if DEBUG
@@ -163,52 +160,8 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
         }
       }
     }
-    free(data);
-      // pinObj = aJson.getArrayItem(pins, i);
+  free(data);
 
-      // pinName = aJson.getObjectItem(pinObj, "pin");
-      // pinValue = aJson.getObjectItem(pinObj, "value");
-      // pinMode = aJson.getObjectItem(pinObj, "mode");
-      // pinAction = aJson.getObjectItem(pinObj, "action");
-      
-// #if DEBUG
-//       Serial.print(F("PIN:"));// << "Working with pin " << pinName->valueint << "\n";
-//       Serial.print(pinName->valueint);
-//       Serial.print(F("\n"));
-// #endif
-//       Pin *p = select_pin(pinName->valueint);
-//       if (pinMode != NULL) {
-// #if DEBUG
-//       Serial.print(F("MODE: "));// << "Working with pin " << pinName->valueint << "\n";
-//       Serial.print(pinMode->valueint);
-//       Serial.print(F("\n"));
-// #endif
-//         p->setMode(pinMode->valueint); 
-//         aJson.deleteItem(pinMode);
-//       }
-//       if (pinAction != NULL) {
-// #if DEBUG
-//         Serial.print(F("ACTION:"));// << "Working with pin " << pinName->valueint << "\n";
-//         Serial.print(pinAction->valuestring);
-//         Serial.print(F("\n"));
-// #endif
-//         if (strcmp(pinAction->valuestring, "getTemp") == 0) {
-//           float currTemp = getTemp(ds);
-//           p->setCurrentValue(currTemp);
-//         }
-//         aJson.deleteItem(pinAction);
-//       }
-//       if (pinValue != NULL) {
-// #if DEBUG
-//       Serial.print(F("VALUE:"));// << "Working with pin " << pinName->valueint << "\n";
-//       Serial.print(pinValue->valueint);
-//       Serial.print(F("\n"));
-// #endif      
-//         p->setState(pinValue->valueint == 1 ? HIGH : LOW);
-//       }
-//     }
-
-  // aJson.deleteItem(root);
   web_server.send_error_code(200);
   web_server.send_content_type("application/javascript");
   web_server.end_headers();
@@ -222,8 +175,58 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
   return true;
 }
 
+boolean subscribe_handler(TinyWebServer& web_server)
+{
+   String pathstring = web_server.get_path();
+#if DEBUG
+    Serial.print(F("Parsed page from "));
+    Serial.print(pathstring);
+    Serial.print(F("\n"));
+#endif
+
+   int size = count_forward_slashes(pathstring);
+#if DEBUG
+   Serial.print(F("Count: "));
+   Serial.print(size);
+   Serial.print(F("\n"));
+#endif
+
+   char** parsed = (char**)malloc(sizeof(char *) * size);
+   parse_path_string(pathstring.c_str(), size, parsed);
+
+   if (parsed[2]) {
+    int pinInt = atoi(parsed[2]);
+
+#if DEBUG
+    Serial.print(F("Subscribing to pin "));
+    Serial.print(pinInt);
+    Serial.print(F("\n"));
+#endif
+    
+   }
+
+   Client& client = web_server.get_client();
+   subscribers[num_subscribers++] = &client;
+
+   for(int j=0; j<size; j++){
+     free(parsed[j]);
+   }
+   free(parsed);
+
+   client.println("HTTP/1.1 200 OK");
+   client.println("Content-Type: text/event-stream;charset=utf-8");
+   client.println("Cache-Control: no-cache");
+   client.println("Connection: keep-alive");
+   client.println();
+
+   client.println("data: ok\n");
+
+   return false;
+}
+
 TinyWebServer::PathHandler handlers[] = {
   // {"/pins/analog", TinyWebServer::GET, &analog_pin_handler},
+  {"/pins/subscribe" "*", TinyWebServer::GET, &subscribe_handler},
   {"/pins/digital", TinyWebServer::POST, &digital_pin_handler},
   {"/pins", TinyWebServer::GET, &pins_handler},
   {"/", TinyWebServer::GET, &index_handler },
@@ -347,6 +350,17 @@ void setup() {
 
 void loop() {
   web.process();
+
+  for(int i=0; i<num_subscribers; i++){
+    Client& client = *subscribers[i];
+    if (client.connected()){
+      client.println("data: hi\n");
+      client.flush();
+    } else {
+      // Handle multiple subscribers?
+      num_subscribers--;
+    }
+  }
 }
 
 // Iterate over pins and update each of their states
@@ -430,10 +444,7 @@ void parse_path_string(const char* cStr, int size, char** messages) {
     int len = strlen(str);
     char *msg = (char *)malloc((len + 1) * sizeof(char)); // sizeof(char) == 1
     strncpy(msg, str, len + 1);
-    // char *msg = strdup(str);
-#if DEBUG
-    Serial << "Writing " << i << " as " << msg << " (" << str << ")\n";
-#endif
+
     messages[i] = msg;
     i++;
   }
