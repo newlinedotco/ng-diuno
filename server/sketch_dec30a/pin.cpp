@@ -15,6 +15,7 @@ Pin::Pin()             { _pin = 0; };
 Pin::Pin(uint8_t num, PinType type)  { 
   _pin = num; 
   _type = type;
+  _currentValue = NULL;
 };
 Pin::~Pin()            {};
 
@@ -26,6 +27,7 @@ void Pin::InitializeState()
       break;
     case ONEWIRE:
       pinMode(_pin, INPUT);
+      _currentValue = 0;
       break;
     default:
       pinMode(_pin, OUTPUT);
@@ -33,15 +35,20 @@ void Pin::InitializeState()
   }
 }
 uint8_t Pin::getState(){
-  if (_currentValue != NULL) {
-    return _currentValue;
-  } else {
-    return _digitalState = digitalRead(_pin);
+  switch(_type) {
+    case ONEWIRE:
+      return _currentValue;
+      break;
+    default:
+      _digitalState = digitalRead(_pin);
+      return _digitalState;
   }
 }
 uint8_t Pin::setState(uint8_t state) {
   digitalWrite(_pin, state);
-  return getState();
+  _digitalState = state;
+  // _digitalState = digitalRead(_pin)
+  return _digitalState;
 }
 uint8_t Pin::getPin()           { return _pin; }
 void    Pin::setPin(uint8_t p)  { _pin = p; }

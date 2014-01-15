@@ -21,6 +21,10 @@ boolean digital_pin_handler(TinyWebServer& web_server);
 void parse_path_string(const char* str, int size, char **messages);
 void get_request_data(TinyWebServer &web_server, char *str);
 
+enum ActionTypes {
+  GETTEMP
+};
+
 const char *HOST = "localhost:9000";
 Pin pins[11] = {
   Pin(9, OUTPUT_T),
@@ -61,84 +65,155 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
     const char* length_str = web_server.get_header_value("Content-Length");
     int len = atoi(length_str);
 
+    const char* action_str_len = web_server.get_header_value("X-Action-Len");
+    len = atoi(action_str_len);
+
     char* data = (char*)malloc(len);
-    if (data) memset(data, 0, sizeof(len));
+    if (data) memset(data, 0, len);
     get_request_data(web_server, len, data);
 
     // DIGITAL
 #if DEBUG
     Serial.print(F("digital_pin_handler: "));
     Serial.print(data);// << "JSON data ->" << data << "<-\n";
-    Serial.print(F("\n"));
+    Serial.print(F(" ("));
+    Serial.print(len);
+    Serial.print(F(")\n"));
 #endif
-    aJsonObject* root = aJson.parse(data);
-    free(data);
-    aJsonObject* pins = aJson.getObjectItem(root, "pins");
+    // aJsonObject* root = aJson.parse(data);
+    // free(data);
+    // aJsonObject* pins = aJson.getObjectItem(root, "pins");
 
-    int arrSize = aJson.getArraySize(pins);
-#if DEBUG
-    Serial.print(F("\nArray of pins: "));// << "Array of pins: " << arrSize << "\n";
-    Serial.print(arrSize);
-    Serial.print(F("\n"));
-#endif
+    // int arrSize = aJson.getArraySize(pins);
 
-    aJsonObject* pinObj;
-    aJsonObject* pinName;
-    aJsonObject* pinValue;
-    aJsonObject* pinMode;
-    aJsonObject* pinAction;
+    int sLen = strlen(data);
 
-    for(int i=0; i<arrSize; i++){
-      pinObj = aJson.getArrayItem(pins, i);
+    char ch;
+    int valueInt, pinInt, actionInt;
+    ActionTypes actionT;
+    float currTemp;
+    // aJsonObject* pinObj;
+    // aJsonObject* pinName;
+    // aJsonObject* pinValue;
+    // aJsonObject* pinMode;
+    // aJsonObject* pinAction;
 
-      pinName = aJson.getObjectItem(pinObj, "pin");
-      pinValue = aJson.getObjectItem(pinObj, "value");
-      pinMode = aJson.getObjectItem(pinObj, "mode");
-      pinAction = aJson.getObjectItem(pinObj, "action");
-      
+    int i = 0;
+    while(i < sLen) {
+
+      if (data[i] == 'p') {
+        // We are parsing a new pin
+        pinInt = (int)(data[++i] - '0');
+        Pin *p = select_pin(pinInt);
 #if DEBUG
-      Serial.print(F("PIN:"));// << "Working with pin " << pinName->valueint << "\n";
-      Serial.print(pinName->valueint);
-      Serial.print(F("\n"));
-#endif
-      Pin *p = select_pin(pinName->valueint);
-      if (pinMode != NULL) {
-#if DEBUG
-      Serial.print(F("MODE: "));// << "Working with pin " << pinName->valueint << "\n";
-      Serial.print(pinMode->valueint);
-      Serial.print(F("\n"));
-#endif
-        p->setMode(pinMode->valueint); 
-        aJson.deleteItem(pinMode);
-      }
-      if (pinAction != NULL) {
-#if DEBUG
-        Serial.print(F("ACTION:"));// << "Working with pin " << pinName->valueint << "\n";
-        Serial.print(pinAction->valuestring);
+        Serial.print(F("Pin: "));
+        Serial.print(pinInt);
         Serial.print(F("\n"));
 #endif
-        if (strcmp(pinAction->valuestring, "getTemp") == 0) {
-          float currTemp = getTemp(ds);
-          p->setCurrentValue(currTemp);
-        }
-        aJson.deleteItem(pinAction);
-      }
-      if (pinValue != NULL) {
+        while(data[i++] != 'p' && i < sLen) {
+          // We're in a pin object
+          switch (data[i]) {
+              case 'v':
+                i++;
+                valueInt = (int)(data[i] - '0');
 #if DEBUG
-      Serial.print(F("VALUE:"));// << "Working with pin " << pinName->valueint << "\n";
-      Serial.print(pinValue->valueint);
-      Serial.print(F("\n"));
-#endif      
-        p->setState(pinValue->valueint == 1 ? HIGH : LOW);
+                Serial.print(F("Value: "));
+                Serial.print(valueInt);
+                Serial.print(F("\n"));
+#endif          
+                p->setState(valueInt);
+                i++;
+                break;
+              case 'a':
+                i++;
+                actionInt = (int)(data[i] - '0');
+                actionT = (ActionTypes)(actionInt);
+#if DEBUG
+                Serial.print(F("Action: "));
+                Serial.print(actionT);
+                Serial.print(F("\n"));
+#endif
+                switch (actionT) {
+                    case GETTEMP:
+                      currTemp = getTemp(ds);
+                      p->setCurrentValue(currTemp);
+                      break;
+                    default:
+#if DEBUG
+                      Serial.print(F("Unknown action: "));
+                      Serial.print(actionT);
+                      Serial.print(F("\n"));
+#endif
+                }
+                break;
+              case 'm':
+#if DEBUG
+                Serial.print(F("Mode: "));
+                // Serial.print();
+                Serial.print(F("\n"));
+#endif  
+                break;
+              default:
+#if DEBUG
+                Serial.print(F("Unknown: "));
+                Serial.print(data[i]);
+                Serial.print(F("\n"));
+#endif
+          }
+        }
       }
     }
+    free(data);
+      // pinObj = aJson.getArrayItem(pins, i);
 
-  aJson.deleteItem(root);
+      // pinName = aJson.getObjectItem(pinObj, "pin");
+      // pinValue = aJson.getObjectItem(pinObj, "value");
+      // pinMode = aJson.getObjectItem(pinObj, "mode");
+      // pinAction = aJson.getObjectItem(pinObj, "action");
+      
+// #if DEBUG
+//       Serial.print(F("PIN:"));// << "Working with pin " << pinName->valueint << "\n";
+//       Serial.print(pinName->valueint);
+//       Serial.print(F("\n"));
+// #endif
+//       Pin *p = select_pin(pinName->valueint);
+//       if (pinMode != NULL) {
+// #if DEBUG
+//       Serial.print(F("MODE: "));// << "Working with pin " << pinName->valueint << "\n";
+//       Serial.print(pinMode->valueint);
+//       Serial.print(F("\n"));
+// #endif
+//         p->setMode(pinMode->valueint); 
+//         aJson.deleteItem(pinMode);
+//       }
+//       if (pinAction != NULL) {
+// #if DEBUG
+//         Serial.print(F("ACTION:"));// << "Working with pin " << pinName->valueint << "\n";
+//         Serial.print(pinAction->valuestring);
+//         Serial.print(F("\n"));
+// #endif
+//         if (strcmp(pinAction->valuestring, "getTemp") == 0) {
+//           float currTemp = getTemp(ds);
+//           p->setCurrentValue(currTemp);
+//         }
+//         aJson.deleteItem(pinAction);
+//       }
+//       if (pinValue != NULL) {
+// #if DEBUG
+//       Serial.print(F("VALUE:"));// << "Working with pin " << pinName->valueint << "\n";
+//       Serial.print(pinValue->valueint);
+//       Serial.print(F("\n"));
+// #endif      
+//         p->setState(pinValue->valueint == 1 ? HIGH : LOW);
+//       }
+//     }
+
+  // aJson.deleteItem(root);
   web_server.send_error_code(200);
   web_server.send_content_type("application/javascript");
   web_server.end_headers();
 
-  pinToString(web_server, pinName->valueint);
+  pinsToString(web_server);
 
 #if DEBUG
     printProgStats();
@@ -157,6 +232,7 @@ TinyWebServer::PathHandler handlers[] = {
 
 const char* headers[] = {
   "Content-Length",
+  "X-Action-Len",
   NULL
 };
 TinyWebServer web = TinyWebServer(handlers, headers);
@@ -294,7 +370,7 @@ bool pinsToString(TinyWebServer& web_server) {
     web_server << F("{\"pin\":");
     web_server << pins[i].getPin();
     web_server << F(",\"value\":");
-    web_server << pins[i].getCurrentValue();
+    web_server << pins[i].getState();
     web_server << F("}");
     if ((i+1) < len) web_server << F(",");
   }
@@ -379,6 +455,7 @@ void get_request_data(TinyWebServer& web_server, int length_str, char* str)
       }
     }
   }
+  str[length_str] = '\0';
 }
 
 /*

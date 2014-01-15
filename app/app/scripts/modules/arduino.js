@@ -21,32 +21,40 @@ angular.module('fsArduino', [])
   };
 
   this.$get = function($q, $http) {
+    var actions = {
+      'getTemp': 0
+    };
+
+    var actionifyPins = function(pins) {
+      var str = '';
+      for (var i = 0; i < pins.length; i++) {
+        var p = pins[i];
+        str += 'p' + p.pin;
+        if (typeof(p.mode) !== 'undefined') {str += 'm' + p.mode;}
+        if (typeof(p.value) !== 'undefined') {str += 'v' + p.value;}
+        if (typeof(p.action) !== 'undefined') {str += 'a' + actions[p.action];}
+      }
+      console.log(str, str.length);
+      return str;
+    };
     var service = {
-      setupPins: function(pins) {
-        console.log('setupPins', pins);
-        return $http({
-          method: 'POST',
-          url: rootUrl + '/pins/setup',
-          data: pins
-        }).then(function(data) {
-          console.log('setupPins', data.data);
-          return data.data;
-        });
-      },
       getPins: function() {
         return $http({
           method: 'GET',
           url: rootUrl + '/pins'
         }).then(function(data) {
-          console.log('getPins', data.data);
           return data.data;
         });
       },
       setPins: function(pins) {
+        var strAction = actionifyPins(pins);
         return $http({
           method: 'POST',
           url: rootUrl + '/pins/digital',
-          data: pins
+          data: strAction,
+          headers: {'X-Action-Len': strAction.length}
+        }).then(function(data) {
+          return data.data;
         });
       }
     };
