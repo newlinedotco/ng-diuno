@@ -11,6 +11,7 @@ angular.module('myApp')
         scope.refresh = function() {
           Arduino.getPins()
           .then(function(pins) {
+            console.log('PINS', pins);
             scope.pins = pins;
           });
         };

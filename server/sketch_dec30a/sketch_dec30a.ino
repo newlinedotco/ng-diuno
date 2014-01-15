@@ -1,19 +1,22 @@
 #define DEBUG 1
 
 #include <SPI.h>
-#include <Ardunio.h>
+// #include <Ardunio.h>
 #include <Ethernet.h>
 #include <Flash.h>
 // #include <SD.h>
 #include <string.h>
 #include <TinyWebServer.h>
 #include <aJSON.h>
+#include <OneWire.h>
 #include "./pin.h"
 
 boolean file_handler(TinyWebServer& web_server);
 boolean index_handler(TinyWebServer& web_server);
 boolean pins_handler(TinyWebServer& web_server);
+boolean setup_handler(TinyWebServer& web_server);
 boolean digital_pin_handler(TinyWebServer& web_server);
+// boolean analog_pin_handler(TinyWebServer& web_server);
 // String parse_path_string(String pathstring, int size);
 void parse_path_string(const char* str, int size, char **messages);
 void get_request_data(TinyWebServer &web_server, char *str);
@@ -24,6 +27,9 @@ Pin pins[11] = {
   Pin(8, DIGITAL),
   Pin(7, DIGITAL),
 };
+
+// OneWire ds(2); // Temp sensor
+
 int numPins = 3;
 
 // const char *HOST = "fathomless-river-4136.herokuapp.com";
@@ -101,19 +107,19 @@ boolean pins_handler(TinyWebServer& web_server) {
   return true;
 }
 
-// POST /dpin/int
+// POST /pins/digital
 boolean digital_pin_handler(TinyWebServer& web_server) {
   // handle pins
   // GET PATH
-  String pathstring = web_server.get_path();
-#if DEBUG
-  Serial << F("Parsed page from ") << pathstring << "\n";
-#endif
+  // String pathstring = web_server.get_path();
+// #if DEBUG
+//   Serial << F("Parsed page from ") << pathstring << "\n";
+// #endif
 
-  int size = count_forward_slashes(pathstring);
-#if DEBUG
-  Serial << "Count: " << size << "\n";
-#endif
+//   int size = count_forward_slashes(pathstring);
+// #if DEBUG
+//   Serial << F("Count: ") << size << "\n";
+// #endif
   // char** parsed = (char**)malloc(sizeof(char *) * size);
   // parse_path_string(pathstring.c_str(), size, parsed);
 
@@ -128,40 +134,64 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
     char* data = (char*)malloc(len);
     if (data) memset(data, 0, sizeof(len));
     get_request_data(web_server, len, data);
+
     // DIGITAL
 #if DEBUG
-    Serial << "JSON data ->" << data << "<-\n";
+    Serial.print(data);// << "JSON data ->" << data << "<-\n";
 #endif
     aJsonObject* root = aJson.parse(data);
+    free(data);
     aJsonObject* pins = aJson.getObjectItem(root, "pins");
 
     int arrSize = aJson.getArraySize(pins);
 #if DEBUG
-    Serial << "Array of pins: " << arrSize << "\n";
+    Serial.print(F("\nArray of pins: "));// << "Array of pins: " << arrSize << "\n";
+    Serial.print(arrSize);
+    Serial.print(F("\n"));
 #endif
 
-    aJsonObject *pinObj;
+    aJsonObject* pinObj;
     aJsonObject* pinName;
     aJsonObject* pinValue;
     aJsonObject* pinMode;
+    aJsonObject* pinAction;
 
     for(int i=0; i<arrSize; i++){
       pinObj = aJson.getArrayItem(pins, i);
 
       pinName = aJson.getObjectItem(pinObj, "pin");
       pinValue = aJson.getObjectItem(pinObj, "value");
-      pinMode = aJson.getObjectItem(pinObj, "mode");
-
-#if DEBUG
-      Serial << (pinName->valueint) << " is: [" << (pinValue->valueint) << "]\n";
-#endif
+      // pinMode = aJson.getObjectItem(pinObj, "mode");
+      pinAction = aJson.getObjectItem(pinObj, "action");
       
-      Pin *p = select_pin(pinName->valueint);
-      if (pinMode != NULL) { 
 #if DEBUG
-      Serial << "Setting pin " << (pinName->valueint) << " to pinMode: " << (pinMode->valueint) << "\n";
+      Serial.print(F("PIN:"));// << "Working with pin " << pinName->valueint << "\n";
+      Serial.print(pinName->valueint);
+      Serial.print(F("\n"));
+#endif
+      Pin *p = select_pin(pinName->valueint);
+      if (pinMode != NULL) {
+#if DEBUG
+      Serial.print(F("MODE:"));// << "Working with pin " << pinName->valueint << "\n";
+      Serial.print(pinMode->valueint);
+      Serial.print(F("\n"));
+      // Serial << "Setting pin " << (pinName->valueint) << " to pinMode: " << (pinMode->valueint) << "\n";
 #endif
         p->setMode(pinMode->valueint); 
+      }
+      if (pinAction != NULL) {
+#if DEBUG
+        Serial.print(F("ACTION:"));// << "Working with pin " << pinName->valueint << "\n";
+        Serial.print(pinAction->valuestring);
+        Serial.print(F("\n"));
+        // Serial << "pinAction is not null: " << pinAction->valuestring << "\n";
+#endif
+        if (strcmp(pinAction->valuestring, "getTemp") == 0) {
+
+          OneWire ds(p->getPin());
+          float currTemp = getTemp(ds);
+          p->setCurrentValue(currTemp);
+        }
       }
       if (pinValue != NULL) {
 #if DEBUG
@@ -176,19 +206,111 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
   web_server.send_content_type("application/javascript");
   web_server.end_headers();
 
-  pinsToString(web_server);
+  pinToString(web_server, pinName->valueint);
 
   // for(int j=0; j<size; j++){
   //   free(parsed[j]);
   // }
   // free(parsed);
-  free(data);
+
+#if DEBUG
+    printProgStats();
+#endif
 
   return true;
 }
 
+boolean setup_handler(TinyWebServer& web_server)
+{
+  // GET REQUEST DATA
+      const char* length_str = web_server.get_header_value("Content-Length");
+      int len = atoi(length_str);
+
+      char* data = (char*)malloc(len);
+      if (data) memset(data, 0, sizeof(len));
+      get_request_data(web_server, len, data);
+
+      // DIGITAL
+  #if DEBUG
+      Serial.print(data);// << "JSON data ->" << data << "<-\n";
+  #endif
+      aJsonObject* root = aJson.parse(data);
+      free(data);
+      aJsonObject* pins = aJson.getObjectItem(root, "pins");
+
+      int arrSize = aJson.getArraySize(pins);
+  #if DEBUG
+      Serial.print(F("\nArray of pins: "));// << "Array of pins: " << arrSize << "\n";
+      Serial.print(arrSize);
+      Serial.print(F("\n"));
+  #endif
+
+      aJsonObject* pinObj;
+      aJsonObject* pinName;
+      aJsonObject* pinMode;
+
+      for(int i=0; i<arrSize; i++){
+        pinObj = aJson.getArrayItem(pins, i);
+
+        pinName = aJson.getObjectItem(pinObj, "pin");
+        pinValue = aJson.getObjectItem(pinObj, "value");
+        pinMode = aJson.getObjectItem(pinObj, "mode");
+        
+  #if DEBUG
+        Serial.print(F("PIN:"));// << "Working with pin " << pinName->valueint << "\n";
+        Serial.print(pinName->valueint);
+        Serial.print(F("\n"));
+  #endif
+        Pin *p = select_pin(pinName->valueint);
+        if (pinMode != NULL) {
+  #if DEBUG
+        Serial.print(F("MODE:"));// << "Working with pin " << pinName->valueint << "\n";
+        Serial.print(pinMode->valueint);
+        Serial.print(F("\n"));
+        // Serial << "Setting pin " << (pinName->valueint) << " to pinMode: " << (pinMode->valueint) << "\n";
+  #endif
+          p->setMode(pinMode->valueint); 
+        }
+        if (pinAction != NULL) {
+  #if DEBUG
+          Serial.print(F("ACTION:"));// << "Working with pin " << pinName->valueint << "\n";
+          Serial.print(pinAction->valuestring);
+          Serial.print(F("\n"));
+          // Serial << "pinAction is not null: " << pinAction->valuestring << "\n";
+  #endif
+          if (strcmp(pinAction->valuestring, "getTemp") == 0) {
+
+            OneWire ds(p->getPin());
+            float currTemp = getTemp(ds);
+            p->setCurrentValue(currTemp);
+          }
+        }
+        if (pinValue != NULL) {
+  #if DEBUG
+        Serial << "Setting pin " << (pinName->valueint) << " to pinValue: " << (pinValue->valueint) << "\n";
+  #endif      
+          p->setState(pinValue->valueint == 1 ? HIGH : LOW);
+        }
+      }
+
+    aJson.deleteItem(root);
+    web_server.send_error_code(200);
+    web_server.send_content_type("application/javascript");
+    web_server.end_headers();
+
+    pinsToString(web_server);
+
+  #if DEBUG
+      printProgStats();
+  #endif
+
+    return true;
+}
+
 TinyWebServer::PathHandler handlers[] = {
-  {"/pins/" "*", TinyWebServer::POST, &digital_pin_handler},
+  // {"/pins/analog", TinyWebServer::GET, &analog_pin_handler},
+  {"/pins/digital", TinyWebServer::POST, &digital_pin_handler},
+  {"/pins/setup", TinyWebServer::POST, &setup_handler},
   {"/pins", TinyWebServer::GET, &pins_handler},
   {"/", TinyWebServer::GET, &index_handler },
   {NULL},
@@ -207,6 +329,53 @@ const char* ip_to_str(const uint8_t* ipAddr)
   return buf;
 }
 
+float getTemp(OneWire sensor){
+//returns the temperature from one DS18S20 in DEG Celsius
+
+byte data[12];
+byte addr[8];
+
+if ( !sensor.search(addr)) {
+   //no more sensors on chain, reset search
+   sensor.reset_search();
+   return -1000;
+}
+
+if ( OneWire::crc8( addr, 7) != addr[7]) {
+   Serial.println("CRC is not valid!");
+   return -1000;
+}
+
+if ( addr[0] != 0x10 && addr[0] != 0x28) {
+   Serial.print("Device is not recognized");
+   return -1000;
+}
+
+sensor.reset();
+sensor.select(addr);
+sensor.write(0x44,1); // start conversion, with parasite power on at the end
+
+byte present = sensor.reset();
+sensor.select(addr);  
+sensor.write(0xBE); // Read Scratchpad
+
+
+for (int i = 0; i < 9; i++) { // we need 9 bytes
+  data[i] = sensor.read();
+}
+
+sensor.reset_search();
+
+byte MSB = data[1];
+byte LSB = data[0];
+
+float tempRead = ((MSB << 8) | LSB); //using two's compliment
+float TemperatureSum = tempRead / 16;
+
+return ((TemperatureSum*9)/5) + 32;
+
+}
+
 void setup() {
 
 #if DEBUG
@@ -214,9 +383,6 @@ void setup() {
 #endif
   // pinMode(10, OUTPUT); // set the SS pin as an output (necessary!)
   // digitalWrite(10, HIGH); // but turn off the W5100 chip!
-  pinMode(13, OUTPUT);
-  pinMode(12, OUTPUT);
-  pinMode(11, OUTPUT);
 
   /*
   char *number;
@@ -278,6 +444,12 @@ void UpdatePinsState() {
   for(int i=0; i<numPins; i++){ pins[i].getState(); }
 }
 
+/*
+*   Pin to string on the webserver helper
+*   This takes a web_server instance and
+*   writes the JSON array associated with
+*   each of the pins
+*/
 bool pinsToString(TinyWebServer& web_server) {
   UpdatePinsState();
 
@@ -289,11 +461,31 @@ bool pinsToString(TinyWebServer& web_server) {
     web_server << F("{\"pin\":");
     web_server << pins[i].getPin();
     web_server << F(",\"value\":");
-    web_server << pins[i].getState();
+    web_server << pins[i].getCurrentValue();
     web_server << F("}");
     if ((i+1) < len) web_server << F(",");
   }
   web_server << F("]}");
+  // web_server << F("}");
+  return true;
+}
+
+bool pinToString(TinyWebServer& web_server, int pin_number) {
+  UpdatePinsState();
+
+  // web_server << F("{\"pins\": ");
+  // web_server << F("{\"digital\":[");
+  int len = numPins;
+  Pin *p = select_pin(pin_number);
+  // for(int i=0; i<len; i++){
+    // digitalPins[i]
+    web_server << F("{\"pin\":");
+    web_server << p->getPin();
+    web_server << F(",\"value\":");
+    web_server << p->getCurrentValue();
+    web_server << F("}");
+  // }
+  // web_server << F("}");
   // web_server << F("}");
   return true;
 }
@@ -312,6 +504,10 @@ int count_forward_slashes(String pathstring) {
   return count;
 }
 
+/*
+*   Parse the requested URL into
+*   an array of strings
+*/
 void parse_path_string(const char* cStr, int size, char** messages) { 
   char* str = strdup(cStr);
   char *p;
@@ -334,6 +530,10 @@ void parse_path_string(const char* cStr, int size, char** messages) {
   }
 }
 
+/*
+*   Read the remaining data from a request
+*   based upon the 'Content-Length' header
+*/
 void get_request_data(TinyWebServer& web_server, int length_str, char* str)
 {
   char ch;
@@ -341,8 +541,6 @@ void get_request_data(TinyWebServer& web_server, int length_str, char* str)
   if(client.available()) {
     for(int i=0; i<length_str; i++){
       ch = (char)client.read();
-    // }
-    // for(char ch = (char)client.read(); ch != NULL && ch != '\n'; ch = (char)client.read()) {
       if (ch != NULL && ch != '\n') {
         str[i] = ch;
       }
@@ -350,9 +548,29 @@ void get_request_data(TinyWebServer& web_server, int length_str, char* str)
   }
 }
 
+/*
+*   Select the pin object from the 
+*   pin array based upon the pinNumber
+*/
 Pin *select_pin(uint8_t pinNumber) {
   for(int i=0; i<numPins; i++){
     if (pins[i].getPin() == pinNumber) return &pins[i];
   }
   return NULL;
+}
+
+/*
+*   Get the free ram
+*/
+int freeRam() {
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+}
+
+void printProgStats() {
+#if DEBUG
+  int freeR = freeRam();
+  Serial << F("Free ram: ") << freeR << F("\n");
+#endif
 }

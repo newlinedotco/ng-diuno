@@ -5,5 +5,9 @@
     'btn-warning': ngModel.value == 1
   }">Toggle {{ ngModel.pin }}</a>
 
+<a ng-click="runAction()" 
+  class="btn btn-primary">Run getTemp on {{ ngModel.pin }}</a>
 <a ng-click="changeMode()" 
   class="btn btn-primary">Change {{ ngModel.pin }} mode</a>
+
+<pre>{{ ngModel | json }}</pre>

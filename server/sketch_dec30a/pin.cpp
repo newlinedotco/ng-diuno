@@ -23,7 +23,11 @@ void Pin::InitializeState()
   digitalWrite(_pin, LOW);
 }
 uint8_t Pin::getState(){
-  return _digitalState = digitalRead(_pin);
+  if (_currentValue != NULL) {
+    return _currentValue;
+  } else {
+    return _digitalState = digitalRead(_pin);
+  }
 }
 uint8_t Pin::setState(uint8_t state) {
   digitalWrite(_pin, state);
@@ -35,6 +39,14 @@ void    Pin::setPin(uint8_t p)  { _pin = p; }
 void    Pin::setMode(uint8_t t) {
   _mode = t;
   pinMode(_pin, t == 0 ? INPUT : OUTPUT);
+}
+
+void  Pin::setCurrentValue(float f) {
+  _currentValue = f;
+}
+
+float Pin::getCurrentValue() {
+  return _currentValue;
 }
 
 void Pin::Print() {

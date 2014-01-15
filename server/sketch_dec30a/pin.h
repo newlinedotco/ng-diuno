@@ -11,6 +11,8 @@ private:
   uint8_t _digitalState;
   uint8_t _type;
   uint8_t _mode;
+
+  float   _currentValue;
   // PinSetting setting;
 public:
   Pin();
@@ -24,6 +26,8 @@ public:
   uint8_t setState(uint8_t state);
 
   void    setMode(uint8_t);
+  void    setCurrentValue(float);
+  float   getCurrentValue();
 
   void InitializeState();
   void Print();

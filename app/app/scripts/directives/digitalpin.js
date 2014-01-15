@@ -22,6 +22,18 @@ angular.module('myApp')
           });
         };
 
+        scope.runAction = function() {
+          Arduino.setPins({
+            'pins': [{
+              pin: scope.ngModel.pin,
+              action: 'getTemp'
+            }]
+          }).then(function(pin) {
+            console.log('pins', pin.data);
+            scope.ngModel = pin.data;
+          });
+        };
+
         scope.toggle = function() {
           if (pinState === 0) {pinState = 1;}
           else {pinState = 0;}

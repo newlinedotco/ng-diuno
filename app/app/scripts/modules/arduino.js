@@ -12,39 +12,40 @@ angular.module('fsArduino', [])
   };
   $httpProvider.interceptors.push(interceptor);
 })
-.service('Arduino', function($q, $http) {
-  this.pins = {
-    digital: {},
-    analog: {}
+.provider('Arduino', function() {
+
+  var rootUrl = 'http://10.0.1.32';
+
+  this.setRootUrl = function(u) {
+    rootUrl = u || rootUrl;
   };
 
-  this.getPins = function() {
-    var d = $q.defer();
-    $http({
-      method: 'GET',
-      url: 'http://10.0.1.32' + '/pins'
-    }).success(function(data) {
-      d.resolve(data);
-    }, function(err) {
-      console.error('error: ', err);
-      d.reject(err);
-    });
-    return d.promise;
-  };
+  this.$get = function($q, $http) {
+    var service = {
+      setupPins: function(pins) {
+        return $http({
+          method: 'POST',
+          url: rootUrl + '/pins/setup',
+          data: pins
+        });
+      },
+      getPins: function() {
+        return $http({
+          method: 'GET',
+          url: rootUrl + '/pins'
+        }).then(function(data) {
+          return data.data;
+        });
+      },
+      setPins: function(pins) {
+        return $http({
+          method: 'POST',
+          url: rootUrl + '/pins/digital',
+          data: pins
+        });
+      }
+    };
 
-  this.setPins = function(pins) {
-    var d = $q.defer();
-    $http({
-      method: 'POST',
-      url: 'http://10.0.1.32' + '/pins/digital',
-      data: pins
-    }).success(function(data) {
-      d.resolve(data);
-    }, function(err) {
-      console.error('ERR', err);
-      d.reject(err);
-    });
-    return d.promise;
+    return service;
   };
-
 });
