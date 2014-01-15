@@ -23,10 +23,14 @@ angular.module('fsArduino', [])
   this.$get = function($q, $http) {
     var service = {
       setupPins: function(pins) {
+        console.log('setupPins', pins);
         return $http({
           method: 'POST',
           url: rootUrl + '/pins/setup',
           data: pins
+        }).then(function(data) {
+          console.log('setupPins', data.data);
+          return data.data;
         });
       },
       getPins: function() {
@@ -34,6 +38,7 @@ angular.module('fsArduino', [])
           method: 'GET',
           url: rootUrl + '/pins'
         }).then(function(data) {
+          console.log('getPins', data.data);
           return data.data;
         });
       },

@@ -2,7 +2,7 @@
 #define _PIN_H
 
 // PINS
-enum PinType {DIGITAL, ANALOG};
+enum PinType { INPUT_T, OUTPUT_T, ONEWIRE};
 enum PinState { HIGH_STATE, LOW_STATE };
 
 class Pin {

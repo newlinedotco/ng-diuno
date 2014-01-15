@@ -1,6 +1,7 @@
 #include <SPI.h>
 #include <Arduino.h>
 #include <Flash.h>
+#include <OneWire.h>
 #include "./pin.h"
 
 // Pin* Pin::newPin()
@@ -19,8 +20,17 @@ Pin::~Pin()            {};
 
 void Pin::InitializeState()
 {
-  pinMode(_pin, OUTPUT);
-  digitalWrite(_pin, LOW);
+  switch(_type) {
+    case INPUT:
+      pinMode(_pin, INPUT);
+      break;
+    case ONEWIRE:
+      pinMode(_pin, INPUT);
+      break;
+    default:
+      pinMode(_pin, OUTPUT);
+      digitalWrite(_pin, LOW);
+  }
 }
 uint8_t Pin::getState(){
   if (_currentValue != NULL) {

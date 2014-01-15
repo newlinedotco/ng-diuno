@@ -1,7 +1,7 @@
 <div class="container">
   <a ng-click="refresh()" class="btn btn-primary">Refresh pins</a>
   <div class="row">
-    <div class='col-sm-4' ng-repeat="pin in pins.digital">
+    <div class='col-sm-4' ng-repeat="pin in pins">
       <span digital-pin ng-model="pin"></span>
     </div>
   </div>
