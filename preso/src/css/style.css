@@ -1,9 +1,9 @@
-@import url(http://fonts.googleapis.com/css?family=Droid+Serif);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans);
 @import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
 
 body {
-  font-family: 'Droid Serif';
-  font-size: 20px;
+  font-family: 'Open Sans';
+  font-size: 26px;
 }
 h1, h2, h3 {
   font-family: 'Yanone Kaffeesatz';
@@ -107,5 +107,5 @@ code {
 .right-column {
   width: 75%;
   float: right;
-  padding-top: 2em;
+  /*padding-top: 2em;*/
 }

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+
+<title>Powering Human Interaction</title>
+
+<meta name="description" content="Powering Human Interaction">    
+
+  <meta name="author" content="powering the arduino with angular" />
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<link rel="stylesheet" href="css/reveal.min.css">
+  <link rel="stylesheet" href="css/theme/moon.css" id="theme">
+
+
+<!-- For syntax highlighting -->
+  <link rel="stylesheet" href="lib/css/github.css">
+
+<link rel="stylesheet" href="css/styles.css">
+
+
+<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+<script>
+  document.write( '<link rel="stylesheet" href="css/print/' +
+    ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + 
+    '.css" type="text/css" media="print">' );
+</script>
+
+<!--[if lt IE 9]>
+<script src="lib/js/html5shiv.js"></script>
+<![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+<!-- Any section element inside of this container is displayed as a slide -->
+<div class="slides">
+
+<section>
+<h1>Powering Human Interaction</h1>
+<h3>powering the arduino with angular</h3>
+<p>
+<h4></h4>
+</p>
+</section>  
+
+
+<section id="ari-lerner-fullstack.io" class="slide level2">
+<h1>Ari Lerner, Fullstack.io</h1>
+<ul>
+<li>Author of <a href="https://ng-book.com">ng-book</a></li>
+<li>Author of a few others (<a href="http://leanpub/d3angularjs">D3 on Angular</a>, <a href="https://leanpub.com/angularjs-rails">Riding Rails with AngularJS</a>)</li>
+<li>Teacher at <a href="http://hackreactor.com">HackReactor</a></li>
+<li>Cofounder of <a href="http://fullstack.io">Fullstack.io</a></li>
+<li>Background in distributed computing and infrastructure (really)</li>
+</ul>
+</section>
+<section id="why-angular" class="slide level2">
+<h1>Why Angular?</h1>
+</section>
+<section id="why-arduino" class="slide level2">
+<h1>Why Arduino?</h1>
+<ul>
+<li>Embedded systems</li>
+<li>Wearable computing</li>
+<li>Low-power systems</li>
+</ul>
+</section>
+<section id="examples" class="slide level2">
+<h1>Examples</h1>
+<ul>
+<li>Nest</li>
+<li>Pebble</li>
+<li>Phillips Hue</li>
+<li>Bellini Wemo</li>
+</ul>
+</section>
+<section id="overview" class="slide level2">
+<h1>Overview</h1>
+<ul>
+<li>Running an HTTP server on the arduino</li>
+<li>Requesting the HTML from the arduino</li>
+<li>Loading angular app</li>
+<li>...</li>
+</ul>
+</section>
+<section id="running-an-http-server" class="slide level2">
+<h1>Running an HTTP server</h1>
+<p>An HTTP server written in C... it's hard...</p>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode c"><code class="sourceCode c"><span class="dt">void</span> loop() {
+  <span class="co">// listen for incoming clients</span>
+  EthernetClient client = server.available();
+  <span class="kw">if</span> (client) {
+    <span class="kw">while</span> (client.connected()) {
+      <span class="kw">if</span> (client.available()) {
+        <span class="dt">char</span> c = client.read();
+        <span class="kw">if</span> (c == <span class="ch">&#39;\n&#39;</span> &amp;&amp; currentLineIsBlank) {
+          client.println(<span class="st">&quot;HTTP/1.1 200 OK&quot;</span>);
+          client.println(<span class="st">&quot;Content-Type: text/html&quot;</span>);
+          client.println(<span class="st">&quot;Connection: close&quot;</span>);
+          client.println();
+          client.println(<span class="st">&quot;&lt;h1&gt;Hi from the Arduino&lt;/h1&gt;&quot;</span>);
+          <span class="kw">break</span>;
+        }
+        <span class="kw">if</span> (c == <span class="ch">&#39;\n&#39;</span>) { currentLineIsBlank = true; } 
+        <span class="kw">else</span> <span class="kw">if</span> (c != <span class="ch">&#39;\r&#39;</span>) { currentLineIsBlank = false; }
+      }
+    }
+    delay(<span class="dv">1</span>);
+    client.stop();
+  }
+}</code></pre>
+</section>
+<section id="enter-tinywebserver" class="slide level2">
+<h1>Enter TinyWebServer</h1>
+<p>Super simplification of the c code</p>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode c"><code class="sourceCode c"><span class="ot">#include &lt;TinyWebServer.h&gt;</span>
+
+boolean index_handler(TinyWebServer&amp; web_server);
+
+boolean index_handler(TinyWebServer&amp; web_server) {
+  web_server.print(F(<span class="st">&quot;&lt;html&gt;&lt;head&gt;&lt;title&gt;Web server&lt;/title&gt;&lt;/head&gt;&quot;</span>));
+  web_server.print(F(<span class="st">&quot;&lt;body&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span>));
+  <span class="kw">return</span> true;
+}</code></pre>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode c"><code class="sourceCode c"><span class="co">// Handlers</span>
+TinyWebServer::PathHandler handlers[] = {
+  {<span class="st">&quot;/pins/digital&quot;</span>, TinyWebServer::POST, &amp;digital_pin_handler},
+  {<span class="st">&quot;/pins&quot;</span>, TinyWebServer::GET, &amp;pins_handler},
+  {<span class="st">&quot;/&quot;</span>, TinyWebServer::GET, &amp;index_handler },
+  {NULL},
+};
+
+<span class="co">// Headers to process</span>
+<span class="dt">const</span> <span class="dt">char</span>* headers[] = {
+  <span class="st">&quot;Content-Length&quot;</span>,
+  <span class="st">&quot;X-Action-Len&quot;</span>,
+  NULL
+};
+TinyWebServer web = TinyWebServer(handlers, headers);</code></pre>
+</section>
+<section id="but-wheres-the-angular" class="slide level2">
+<h1>But where's the angular?</h1>
+</section>
+<section id="options" class="slide level2">
+<h1>Options</h1>
+</section>
+<section id="embed-directly-in-arduino-code" class="slide level2">
+<h1>Embed directly in Arduino code</h1>
+<h3 id="pros">Pros</h3>
+<ul>
+<li>Simple</li>
+</ul>
+<h3 id="cons">Cons</h3>
+<ul>
+<li>Hard to update</li>
+<li>Space limitations (32kb is not a lot of space)</li>
+</ul>
+</section>
+<section id="readsend-from-sd-card" class="slide level2">
+<h1>Read/Send from SD card</h1>
+<h3 id="pros-1">Pros</h3>
+<ul>
+<li>Simple</li>
+<li>Tons of space (4+ gigs)</li>
+</ul>
+<h3 id="cons-1">Cons</h3>
+<ul>
+<li>Hard to update</li>
+</ul>
+</section>
+<section id="load-from-remote-server" class="slide level2">
+<h1>Load from remote server</h1>
+<h3 id="pros-2">Pros</h3>
+<ul>
+<li>Simple</li>
+<li>Easy to update</li>
+</ul>
+<h3 id="cons-2">Cons</h3>
+<ul>
+<li>Need internet connection</li>
+</ul>
+</section>
+<section id="connecting-to-the-internet" class="slide level2">
+<h1>Connecting to the internet</h1>
+<ul>
+<li>Ethernet shield</li>
+<li>Wifi shield</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode c"><code class="sourceCode c"><span class="ot">#include &lt;Ethernet.h&gt;</span>
+<span class="co">// ...</span>
+Ethernet.begin(mac, ip);</code></pre>
+</section>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.min.js"></script>
+
+<script>
+  // Full list of configuration options available here:
+  // https://github.com/hakimel/reveal.js#configuration
+  Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: false,
+
+  // available themes are in /css/theme
+      theme: Reveal.getQueryHash().theme || 'moon', 
+  
+  // default/cube/page/concave/zoom/linear/fade/none
+      transition: Reveal.getQueryHash().transition || 'linear',
+  
+  // Optional libraries used to extend on reveal.js
+  dependencies: [
+    { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+    { src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+    { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+    // { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+    { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+    { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+    // { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+  ]
+  });
+
+</script>
+
+</body>
+</html>

@@ -26,7 +26,7 @@ enum ActionTypes {
   GETTEMP
 };
 
-const char *HOST = "localhost:9000";
+const char *HOST = "192.168.0.88:9000";
 Pin pins[11] = {
   Pin(9, OUTPUT_T),
   Pin(8, OUTPUT_T),
@@ -41,7 +41,6 @@ int numPins = 3;
 
 static uint8_t mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
-// Don't forget to modify the IP to an available one on your home network
 byte ip[] = { 192, 168, 0, 67 };
 
 boolean index_handler(TinyWebServer& web_server) {
@@ -370,24 +369,6 @@ void setup() {
 
 void loop() {
   web.process();
-
-  if (subscriber != NULL) {
-    if (subscriber->connected()){
-#if DEBUG
-      Serial.println(F("Sending event"));
-#endif
-      subscriber->println("data: hi\n");
-    } else {
-#if DEBUG
-      Serial.println("Client not connected?");
-#endif
-      if (subscriber->available()) {
-        Serial.println("Client available");
-      }
-      // Handle multiple subscribers?
-      // num_subscribers--;
-    }
-  }
 }
 
 // Iterate over pins and update each of their states

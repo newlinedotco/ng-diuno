@@ -2,51 +2,41 @@ name: inverse
 layout: true
 class: center, middle, inverse
 ---
-#remark
-[ri-mahrk]
-.footnote[Go to directly to [project site](https://github.com/gnab/remark)]
+#Pioneering human interaction
 ---
-## What is it and why should I be using it?
+#Powering the arduino with Angular
+---
+layout: false
+
+.left-column[
+
+  ### Arduino
+
+]
+.right-column[
+  
+  ### WHY?
+
+]
 ---
 layout: false
 .left-column[
-  ## What is it?
+  ## Ari Lerner
 ]
 .right-column[
-  A simple, in-browser, Markdown-driven slideshow tool targeted at people who know their way around HTML and CSS, featuring:
 
-- Markdown formatting, with smart extensions
+- I wrote a few books, including [ng-book](https://ng-book.com) and [D3 on AngularJS](https://leanpub.com/d3angularjs)
 
-- Presenter mode, with cloned slideshow view
+- I teach programming at [HackReactor](http://hackreactor.com/)
 
-- Syntax highlighting, supporting a range of languages
+- I run a small company based in San Francisco
 
-- Slide scaling, thus similar appearance on all devices / resolutions .red[*]
+- Mostly a back-end systems guy
 
-- Touch support for smart phones and pads, i.e. swipe to navigate slides
-
-.footnote[.red[*] At least browsers try their best]
 ]
+
 ---
-.left-column[
-  ## What is it?
-  ## Why use it?
-]
-.right-column[
-If your ideal slideshow creation workflow contains any of the following steps:
-
-- Just write what's on your mind
-
-- Do some basic styling
-
-- Easily collaborate with others
-
-- Share with and show to everyone
-
-Then remark might be perfect for your next.red[*] slideshow!
-
-.footnote[.red[*] You probably want to convert existing slideshows as well]
-]
+# Why angular?
 ---
 .left-column[
   ## What is it?

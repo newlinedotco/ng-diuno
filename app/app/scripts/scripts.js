@@ -25,18 +25,21 @@
   };
 
   createLinkTag('bower_components/sass-bootstrap/dist/css/bootstrap.css');
+  createLinkTag('bower_components/ionic/dist/css/ionic.min.css');
   createLinkTag('styles/main.css');
 
   var arr = [
     'scripts/modules/arduino.js',
     'scripts/app.js',
     'scripts/controllers/main.js',
+    'scripts/services/d3.js',
     'scripts/directives/mainview.js',
-    'scripts/directives/digitalpin.js'
+    'scripts/directives/temperatureGauge.js'
   ];
 
   createScriptTag('bower_components/angular/angular.js');
   createScriptTag('bower_components/angular-route/angular-route.js');
+  createScriptTag('bower_components/d3/d3.min.js');
 
   arr.forEach(function(src) {
     createScriptTag(src);

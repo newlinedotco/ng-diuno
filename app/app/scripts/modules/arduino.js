@@ -56,15 +56,6 @@ angular.module('fsArduino', [])
           return data.data;
         });
       }
-      // subscribeToPin: function(pin) {
-      //   return $http({
-      //     method: 'GET',
-      //     url: rootUrl + '/pins/subscribe/' + pin,
-      //     headers: {'Accept': 'text/event-stream'}
-      //   }).then(function(data) {
-      //     console.log('DATA FROM SUBSCRIBE',data);
-      //   });
-      // }
     };
 
     return service;

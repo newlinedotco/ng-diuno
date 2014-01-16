@@ -1,8 +1,12 @@
-<div class="container">
-  <a ng-click="refresh()" class="btn btn-primary">Refresh pins</a>
-  <div class="row">
-    <div class='col-sm-4' ng-repeat="pin in pins">
-      <span digital-pin ng-model="pin"></span>
-    </div>
-  </div>
+<div class="bar bar-header bar-calm">
+  <h1 class="title">ngNest</h1>
 </div>
+<content class='container content' padded="true">
+  <div class="row">
+    <button ng-click="lowerTemp()" class="col button button-positive">-</button>
+    <button ng-click="raiseTemp()" class="col button button-assertive">+</button>
+  </div>
+  <div class="row">
+    <div class="col-50" temperature-gauge ng-model='temperature'></div>
+  </div>
+</content>
