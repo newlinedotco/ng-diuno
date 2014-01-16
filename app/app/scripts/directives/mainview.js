@@ -19,11 +19,6 @@ angular.module('myApp')
         };
 
         scope.refresh = function() {
-          // Arduino.getPins()
-          // .then(function(pins) {
-          //   scope.pins = pins.pins;
-          //   scope.temperature = selectPin(temp).value;
-          // });
           (function poll() {
             Arduino.setPins([
               { pin: temp, action: 'getTemp' }

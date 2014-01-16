@@ -1,0 +1,55 @@
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode, table.sourceCode pre {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+  border: none;
+}
+td.lineNumbers {
+  border-right: 0px solid #AAAAAA;
+  text-align: right;
+  color: #AAAAAA;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+td.sourceCode {
+  padding-left: 5px;
+}
+.sourceCode .kw {
+  color: #268bd2;
+}
+.sourceCode .dt {
+  color: #268bd2;
+}
+.sourceCode .dv, .sourceCode .bn, .sourceCode .fl {
+  color: #d33682;
+}
+.sourceCode .ch {
+  color: #dc322f;
+}
+.sourceCode .st {
+  color: #2aa198;
+}
+.sourceCode .co {
+  color: #93a1a1;
+}
+.sourceCode .ot {
+  color: #b58900;
+}
+.sourceCode .al {
+  color: #cb4b16;
+  font-weight: bold;
+}
+.sourceCode .fu {
+  color: #268bd2;
+}
+.sourceCode .er {
+  color: #dc322f;
+  font-weight: bold;
+}
+pre {
+  margin-bottom: 1em;
+  padding: 1.5em;
+  overflow: auto;
+  background-color: #111111;
+}

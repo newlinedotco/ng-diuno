@@ -19,7 +19,7 @@
 
 
 <!-- For syntax highlighting -->
-  <link rel="stylesheet" href="lib/css/github.css">
+  <link rel="stylesheet" href="lib/css/default.css">
 
 <link rel="stylesheet" href="css/styles.css">
 
@@ -61,6 +61,10 @@
 <li>Cofounder of <a href="http://fullstack.io">Fullstack.io</a></li>
 <li>Background in distributed computing and infrastructure (really)</li>
 </ul>
+</section>
+<section id="obligatory" class="slide level2">
+<h1>Obligatory</h1>
+<p><img src="images/ng-book.png" /> <img src="images/d3.png" /> <img src="images/rails.png" /></p>
 </section>
 <section id="why-angular" class="slide level2">
 <h1>Why Angular?</h1>
@@ -153,7 +157,26 @@ TinyWebServer::PathHandler handlers[] = {
   <span class="st">&quot;X-Action-Len&quot;</span>,
   NULL
 };
-TinyWebServer web = TinyWebServer(handlers, headers);</code></pre>
+TinyWebServer web = TinyWebServer(handlers, headers);
+<span class="co">// ...</span>
+<span class="dt">void</span> loop() {
+  web.process();
+};</code></pre>
+</section>
+<section id="connecting-to-the-internet" class="slide level2">
+<h1>Connecting to the internet</h1>
+<ul>
+<li>Ethernet shield</li>
+<li>Wifi shield</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode c"><code class="sourceCode c"><span class="ot">#include &lt;Ethernet.h&gt;</span>
+byte ip[] = { <span class="dv">192</span>, <span class="dv">168</span>, <span class="dv">0</span>, <span class="dv">67</span> };
+<span class="co">// ...</span>
+Ethernet.begin(mac, ip);</code></pre>
+<p><em>DHCP</em> is also supported</p>
 </section>
 <section id="but-wheres-the-angular" class="slide level2">
 <h1>But where's the angular?</h1>
@@ -197,18 +220,344 @@ TinyWebServer web = TinyWebServer(handlers, headers);</code></pre>
 <li>Need internet connection</li>
 </ul>
 </section>
-<section id="connecting-to-the-internet" class="slide level2">
-<h1>Connecting to the internet</h1>
-<ul>
-<li>Ethernet shield</li>
-<li>Wifi shield</li>
-</ul>
+<section id="browser" class="slide level2">
+<h1>Browser</h1>
 </section>
 <section class="slide level2">
 
-<pre class="sourceCode c"><code class="sourceCode c"><span class="ot">#include &lt;Ethernet.h&gt;</span>
-<span class="co">// ...</span>
-Ethernet.begin(mac, ip);</code></pre>
+<pre class="sourceCode html"><code class="sourceCode html">const char *HOST = &quot;aridev:9000&quot;;
+// ...
+boolean index_handler(TinyWebServer<span class="er">&amp;</span> web_server) {
+  // ...
+  web_server.print(F(&quot;<span class="kw">&lt;script</span><span class="ot"> id=</span><span class="st">\</span><span class="er">&quot;appscript\&quot;</span><span class="ot"> src=</span><span class="st">\</span><span class="er">&quot;http://&quot;));</span>
+<span class="ot">  web_server.print</span><span class="er">(HOST);</span>
+<span class="ot">  web_server.print</span><span class="er">(F(&quot;/scripts/scripts.js\&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>&quot;));
+  // ...
+};</code></pre>
+</section>
+<section id="but-wheres-the-angular-1" class="slide level2">
+<h1>But where's the Angular</h1>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode javascript"><code class="sourceCode javascript">(<span class="kw">function</span>() {
+  <span class="kw">var</span> scriptTag = <span class="ot">document</span>.<span class="fu">getElementsByTagName</span>(<span class="st">&#39;script&#39;</span>)[<span class="dv">0</span>];
+  <span class="kw">var</span> matches = <span class="ot">scriptTag</span>.<span class="ot">src</span>.<span class="fu">match</span>(<span class="ot">/</span><span class="fl">^</span><span class="ot">http</span><span class="bn">[s]</span><span class="fl">?\:\/\/(</span><span class="bn">[</span><span class="fl">^\/</span><span class="bn">?#]</span><span class="fl">+)(?</span><span class="ot">:</span><span class="bn">[</span><span class="fl">\/</span><span class="bn">?#]</span><span class="fl">|</span><span class="ot">$</span><span class="fl">)</span><span class="ot">/i</span>);
+  <span class="kw">var</span> host = matches[<span class="dv">0</span>];
+  <span class="kw">var</span> body  = <span class="ot">document</span>.<span class="fu">getElementsByTagName</span>(<span class="st">&#39;body&#39;</span>)[<span class="dv">0</span>];
+  <span class="kw">var</span> head  = <span class="ot">document</span>.<span class="fu">getElementsByTagName</span>(<span class="st">&#39;head&#39;</span>)[<span class="dv">0</span>];
+
+  <span class="kw">var</span> createLinkTag = <span class="kw">function</span>(src) {
+    <span class="kw">var</span> link = <span class="ot">document</span>.<span class="fu">createElement</span>(<span class="st">&#39;link&#39;</span>);
+    <span class="ot">link</span>.<span class="fu">setAttribute</span>(<span class="st">&#39;rel&#39;</span>, <span class="st">&#39;stylesheet&#39;</span>);
+    <span class="ot">link</span>.<span class="fu">setAttribute</span>(<span class="st">&#39;type&#39;</span>, <span class="st">&#39;text/css&#39;</span>);
+    <span class="ot">link</span>.<span class="fu">setAttribute</span>(<span class="st">&#39;href&#39;</span>, host + <span class="st">&#39;/&#39;</span> + src);
+    <span class="ot">head</span>.<span class="fu">appendChild</span>(link);
+  };
+
+  <span class="kw">var</span> createScriptTag = <span class="kw">function</span>(src, async) {
+    <span class="kw">var</span> script   = <span class="ot">document</span>.<span class="fu">createElement</span>(<span class="st">&#39;script&#39;</span>);
+    <span class="ot">script</span>.<span class="fu">setAttribute</span>(<span class="st">&#39;src&#39;</span>, host + <span class="st">&#39;/&#39;</span> + src);
+    <span class="ot">script</span>.<span class="fu">async</span> = async || <span class="kw">false</span>;
+
+    <span class="ot">body</span>.<span class="fu">appendChild</span>(script);
+  };
+  <span class="co">// ...</span></code></pre>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode javascript"><code class="sourceCode javascript">  <span class="fu">createLinkTag</span>(<span class="st">&#39;styles/main.css&#39;</span>);
+
+  <span class="kw">var</span> arr = [
+    <span class="st">&#39;scripts/modules/arduino.js&#39;</span>,
+    <span class="st">&#39;scripts/app.js&#39;</span>
+    <span class="co">// ...</span>
+  ];
+
+  <span class="fu">createScriptTag</span>(<span class="st">&#39;bower_components/angular/angular.js&#39;</span>);
+  <span class="fu">createScriptTag</span>(<span class="st">&#39;bower_components/angular-route/angular-route.js&#39;</span>);
+
+  <span class="ot">arr</span>.<span class="fu">forEach</span>(<span class="kw">function</span>(src) { <span class="fu">createScriptTag</span>(src); });
+  <span class="co">// Bootstrap</span>
+  <span class="ot">body</span>.<span class="fu">setAttribute</span>(<span class="st">&#39;ng-app&#39;</span>, <span class="st">&#39;myApp&#39;</span>);
+  <span class="kw">var</span> app   = <span class="ot">document</span>.<span class="fu">createElement</span>(<span class="st">&#39;div&#39;</span>);
+  <span class="kw">var</span> main  = <span class="ot">document</span>.<span class="fu">createElement</span>(<span class="st">&#39;div&#39;</span>);
+  <span class="ot">main</span>.<span class="fu">setAttribute</span>(<span class="st">&#39;main-view&#39;</span>, <span class="st">&#39;&#39;</span>);
+  <span class="ot">app</span>.<span class="fu">appendChild</span>(main);
+  <span class="ot">body</span>.<span class="fu">appendChild</span>(app);
+})();</code></pre>
+</section>
+<section class="slide level2">
+
+<figure>
+<img src="/images/load_in_browser.png" />
+</figure>
+</section>
+<section id="command-and-control" class="slide level2">
+<h1>Command and Control</h1>
+<ul>
+<li>Arduino -&gt; Browser (√)</li>
+<li>Browser -&gt; Angular (...)</li>
+</ul>
+</section>
+<section id="expose-the-local-ip-to-the-browser" class="slide level2">
+<h1>Expose the local ip to the browser</h1>
+<pre class="sourceCode c"><code class="sourceCode c">boolean index_handler(TinyWebServer&amp; web_server) {
+  <span class="co">// ...</span>
+  web_server.print(F(<span class="st">&quot;&lt;script&gt;window.ip=</span><span class="ch">\&quot;</span><span class="st">&quot;</span>));
+  web_server.print(ip_to_str(ip));
+  web_server.print(F(<span class="st">&quot;</span><span class="ch">\&quot;</span><span class="st">&lt;/script&gt;&quot;</span>));
+  <span class="co">// ...</span>
+};</code></pre>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">angular</span>.<span class="fu">module</span>(<span class="st">&#39;fsArduino&#39;</span>, [])
+.<span class="fu">provider</span>(<span class="st">&#39;Arduino&#39;</span>, <span class="kw">function</span>() {
+  <span class="kw">this</span>.<span class="fu">setRootUrl</span> = <span class="kw">function</span>(u) {
+    rootUrl = u || rootUrl;
+  };
+
+  <span class="kw">this</span>.<span class="fu">$get</span> = <span class="kw">function</span>($q, $http) {
+    <span class="kw">var</span> actions = {
+      <span class="st">&#39;getTemp&#39;</span>: <span class="dv">0</span>
+    };
+  <span class="co">//...</span>
+
+});</code></pre>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">angular</span>.<span class="fu">module</span>(<span class="st">&#39;myApp&#39;</span>, [
+  <span class="st">&#39;fsArduino&#39;</span>
+])
+.<span class="fu">config</span>(<span class="kw">function</span>(ArduinoProvider) {
+  <span class="ot">ArduinoProvider</span>.<span class="fu">setRootUrl</span>(<span class="ot">window</span>.<span class="fu">ip</span>);
+});</code></pre>
+</section>
+<section id="interaction" class="slide level2">
+<h1>Interaction</h1>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">angular</span>.<span class="fu">module</span>(<span class="st">&#39;fsArduino&#39;</span>, [])
+.<span class="fu">provider</span>(<span class="st">&#39;Arduino&#39;</span>, <span class="kw">function</span>() {
+  <span class="co">// ...</span>
+  <span class="kw">this</span>.<span class="fu">$get</span> = <span class="kw">function</span>($http) {
+    <span class="kw">return</span> {
+      <span class="dt">getPins</span>: <span class="kw">function</span>() {},
+      <span class="dt">setPins</span>: <span class="kw">function</span>() {}
+    };
+  }
+});</code></pre>
+</section>
+<section id="summary-of-hardware-hacking" class="slide level2">
+<h1>Summary of hardware hacking</h1>
+<ul>
+<li>Turning pins on/HIGH</li>
+<li>Turning pins off/LOW</li>
+<li>Measuring pin voltage</li>
+</ul>
+</section>
+<section id="getting-pin-status" class="slide level2">
+<h1>Getting pin status</h1>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="co">// ...</span>
+getPins: <span class="kw">function</span>() {
+  <span class="kw">return</span> <span class="fu">$http</span>({
+    <span class="dt">method</span>: <span class="st">&#39;GET&#39;</span>,
+    <span class="dt">url</span>: rootUrl + <span class="st">&#39;/pins&#39;</span>
+  }).<span class="fu">then</span>(<span class="kw">function</span>(data) {
+    <span class="kw">return</span> <span class="ot">data</span>.<span class="fu">data</span>;
+  });
+},
+<span class="co">// ...</span></code></pre>
+</section>
+<section id="serving-pin-status" class="slide level2">
+<h1>Serving pin status</h1>
+<pre class="sourceCode c"><code class="sourceCode c"><span class="co">// GET /pins</span>
+boolean pins_handler(TinyWebServer&amp; web_server) {
+  web_server.send_error_code(<span class="dv">200</span>);
+  web_server.send_content_type(<span class="st">&quot;application/javascript&quot;</span>);
+  web_server.end_headers();
+
+  pinsToString(web_server);
+  <span class="kw">return</span> true;
+}</code></pre>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode c"><code class="sourceCode c">bool pinsToString(TinyWebServer&amp; web_server) {
+  UpdatePinsState();
+
+  web_server &lt;&lt; F(<span class="st">&quot;{</span><span class="ch">\&quot;</span><span class="st">pins</span><span class="ch">\&quot;</span><span class="st">:[&quot;</span>);
+  <span class="dt">int</span> len = numPins;
+  <span class="kw">for</span>(<span class="dt">int</span> i=<span class="dv">0</span>; i&lt;len; i++){
+    web_server &lt;&lt; F(<span class="st">&quot;{</span><span class="ch">\&quot;</span><span class="st">pin</span><span class="ch">\&quot;</span><span class="st">:&quot;</span>);
+    web_server &lt;&lt; pins[i].getPin();
+    web_server &lt;&lt; F(<span class="st">&quot;,</span><span class="ch">\&quot;</span><span class="st">value</span><span class="ch">\&quot;</span><span class="st">:&quot;</span>);
+    web_server &lt;&lt; pins[i].getState();
+    web_server &lt;&lt; F(<span class="st">&quot;}&quot;</span>);
+    <span class="kw">if</span> ((i<span class="dv">+1</span>) &lt; len) web_server &lt;&lt; F(<span class="st">&quot;,&quot;</span>);
+  }
+  web_server &lt;&lt; F(<span class="st">&quot;]}&quot;</span>);
+  <span class="kw">return</span> true;
+}</code></pre>
+</section>
+<section id="modifying-pin-states" class="slide level2">
+<h1>Modifying pin states</h1>
+<p>Angular works with JSON by default (just javascript), but the Arduino does not...</p>
+</section>
+<section id="ajson.h" class="slide level2">
+<h1>aJSON.h</h1>
+<p>The JSON parsing library written in c for the Arduino. However, parsing a schemaless data structure in a strictly typed language is... difficult.</p>
+</section>
+<section id="creating-our-own-data-structure" class="slide level2">
+<h1>Creating our own data-structure</h1>
+<p>Instead of relying on JSON, we can create our own protocol for handling interaction between Angular and the Arduino, we can define our own protocol.</p>
+</section>
+<section id="actions" class="slide level2">
+<h1>Actions</h1>
+<pre class="sourceCode javascript"><code class="sourceCode javascript">  <span class="co">// in mainview directive</span>
+  <span class="ot">Arduino</span>.<span class="fu">setPins</span>([
+    { <span class="dt">pin</span>: temp, <span class="dt">action</span>: <span class="st">&#39;getTemp&#39;</span> }
+  ]);
+  <span class="co">// in Arduino provider</span>
+  <span class="kw">var</span> actions = {
+    <span class="st">&#39;getTemp&#39;</span>: <span class="dv">0</span>
+  };
+  <span class="kw">var</span> actionifyPins = <span class="kw">function</span>(pins) {
+    <span class="kw">var</span> str = <span class="st">&#39;&#39;</span>;
+    <span class="kw">for</span> (<span class="kw">var</span> i = <span class="dv">0</span>; i &lt; <span class="ot">pins</span>.<span class="fu">length</span>; i++) {
+      <span class="kw">var</span> p = pins[i];
+      str += <span class="st">&#39;p&#39;</span> + <span class="ot">p</span>.<span class="fu">pin</span>;
+      <span class="kw">if</span> (<span class="kw">typeof</span>(<span class="ot">p</span>.<span class="fu">mode</span>) !== <span class="st">&#39;undefined&#39;</span>) {str += <span class="st">&#39;m&#39;</span> + <span class="ot">p</span>.<span class="fu">mode</span>;}
+      <span class="kw">if</span> (<span class="kw">typeof</span>(<span class="ot">p</span>.<span class="fu">value</span>) !== <span class="st">&#39;undefined&#39;</span>) {str += <span class="st">&#39;v&#39;</span> + <span class="ot">p</span>.<span class="fu">value</span>;}
+      <span class="kw">if</span> (<span class="kw">typeof</span>(<span class="ot">p</span>.<span class="fu">action</span>) !== <span class="st">&#39;undefined&#39;</span>) {str += <span class="st">&#39;a&#39;</span> + actions[<span class="ot">p</span>.<span class="fu">action</span>];}
+    }
+    <span class="kw">return</span> str;
+  };</code></pre>
+</section>
+<section id="using-it-service" class="slide level2">
+<h1>Using it service</h1>
+<pre class="sourceCode javascript"><code class="sourceCode javascript">setPins: <span class="kw">function</span>(pins) {
+  <span class="kw">var</span> strAction = <span class="fu">actionifyPins</span>(pins);
+  <span class="kw">return</span> <span class="fu">$http</span>({
+    <span class="dt">method</span>: <span class="st">&#39;POST&#39;</span>,
+    <span class="dt">url</span>: rootUrl + <span class="st">&#39;/pins/digital&#39;</span>,
+    <span class="dt">data</span>: strAction,
+    <span class="dt">headers</span>: {<span class="st">&#39;X-Action-Len&#39;</span>: <span class="ot">strAction</span>.<span class="fu">length</span>}
+  }).<span class="fu">then</span>(<span class="kw">function</span>(data) {
+    <span class="kw">return</span> <span class="ot">data</span>.<span class="fu">data</span>;
+  });
+}</code></pre>
+</section>
+<section class="slide level2">
+
+<p>This turns the JSON from:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript">{ <span class="dt">pin</span>: <span class="dv">7</span>, <span class="dt">action</span>: <span class="st">&#39;getTemp&#39;</span> } (<span class="dv">24</span> bytes)</code></pre>
+<p>into</p>
+<pre class="sourceCode c"><code class="sourceCode c">p7a0 (<span class="dv">4</span> bytes)</code></pre>
+</section>
+<section id="parsing-in-c" class="slide level2">
+<h1>Parsing in c</h1>
+<pre class="sourceCode c"><code class="sourceCode c"><span class="kw">enum</span> ActionTypes {
+  GETTEMP
+};
+<span class="co">// POST /pins/digital</span>
+boolean digital_pin_handler(TinyWebServer&amp; web_server) {
+  <span class="co">// Get the action length</span>
+  <span class="dt">const</span> <span class="dt">char</span>* action_str_len = web_server.get_header_value(<span class="st">&quot;X-Action-Len&quot;</span>);
+  <span class="dt">int</span> len = atoi(action_str_len);
+  <span class="co">// Get the request data based on the length</span>
+  <span class="dt">char</span>* data = (<span class="dt">char</span>*)malloc(len);
+  <span class="kw">if</span> (data) memset(data, <span class="dv">0</span>, len);
+  get_request_data(web_server, len, data);
+  <span class="co">// ...</span>
+};</code></pre>
+</section>
+<section id="continued" class="slide level2">
+<h1>Continued</h1>
+<pre class="sourceCode javascript"><code class="sourceCode javascript">int sLen = <span class="fu">strlen</span>(data);
+int i = <span class="dv">0</span>;
+<span class="kw">while</span>(i &lt; sLen) {
+  <span class="kw">if</span> (data[i] == <span class="st">&#39;p&#39;</span>) {
+    <span class="co">// We are parsing a new pin</span>
+    pinInt = (int)(data[++i] - <span class="st">&#39;0&#39;</span>);
+    Pin *p = <span class="fu">select_pin</span>(pinInt);
+    <span class="kw">while</span>(data[i++] != <span class="st">&#39;p&#39;</span> &amp;&amp; i &lt; sLen) {
+      <span class="co">// We&#39;re in a pin object</span>
+      <span class="kw">switch</span> (data[i]) {
+        <span class="kw">case</span> <span class="st">&#39;a&#39;</span>:
+          i++;
+          actionInt = (int)(data[i] - <span class="st">&#39;0&#39;</span>);
+          actionT = (ActionTypes)(actionInt);
+          <span class="kw">switch</span> (actionT) {
+            <span class="kw">case</span> <span class="dt">GETTEMP</span>:
+              currTemp = <span class="fu">getTemp</span>(ds);
+              p-&gt;<span class="fu">setCurrentValue</span>(currTemp);
+              <span class="kw">break</span>;
+          <span class="co">// ...</span></code></pre>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode c"><code class="sourceCode c"><span class="dt">float</span> getTemp(OneWire sensor){
+  <span class="co">//returns the temperature from one DS18S20 in DEG Celsius</span>
+  byte data[<span class="dv">12</span>], addr[<span class="dv">8</span>];
+  <span class="dt">float</span> celsius, fahrenheit;
+
+  sensor.search(addr);
+  sensor.reset();
+  sensor.select(addr);
+  sensor.write(<span class="bn">0x44</span>,<span class="dv">1</span>);
+  delay(<span class="dv">1000</span>);
+
+  byte present = sensor.reset();
+  sensor.select(addr);  
+  sensor.write(<span class="bn">0xBE</span>); <span class="co">// Read Scratchpad</span>
+
+  <span class="kw">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; <span class="dv">9</span>; i++) { data[i] = sensor.read(); }
+
+  sensor.reset_search();
+  byte MSB = data[<span class="dv">1</span>];
+  byte LSB = data[<span class="dv">0</span>];
+
+  <span class="dt">int16_t</span> raw = (data[<span class="dv">1</span>] &lt;&lt; <span class="dv">8</span>) | data[<span class="dv">0</span>]; raw = raw &lt;&lt; <span class="dv">3</span>;
+  <span class="kw">if</span> (data[<span class="dv">7</span>] == <span class="bn">0x10</span>) { raw = (raw &amp; <span class="bn">0xFFF0</span>) + <span class="dv">12</span> - data[<span class="dv">6</span>]; }
+
+  celsius = (<span class="dt">float</span>)raw / <span class="fl">16.0</span>;
+  fahrenheit = celsius * <span class="fl">1.8</span> + <span class="fl">32.0</span>;
+  <span class="kw">return</span> fahrenheit;
+}</code></pre>
+</section>
+<section id="interface" class="slide level2">
+<h1>Interface</h1>
+<p>Finally, we want to show the data in a meaningful, <em>sexy</em> way...</p>
+</section>
+<section id="d3" class="slide level2">
+<h1>d3</h1>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">angular</span>.<span class="fu">module</span>(<span class="st">&#39;myApp&#39;</span>)
+  .<span class="fu">service</span>(<span class="st">&#39;D3&#39;</span>, <span class="kw">function</span> <span class="fu">D3</span>() { <span class="kw">return</span> <span class="ot">window</span>.<span class="fu">d3</span>; })
+  .<span class="fu">directive</span>(<span class="st">&#39;temperatureGauge&#39;</span>, <span class="kw">function</span>(D3) {
+    <span class="kw">return</span> {
+      <span class="dt">template</span>: <span class="st">&#39;&lt;div class=&quot;thermometer&quot;&gt;&lt;svg&gt;&lt;/svg&gt;&lt;/div&gt;&#39;</span>,
+      <span class="dt">scope</span>: { <span class="st">&#39;ngModel&#39;</span>: <span class="st">&#39;=&#39;</span> },
+      <span class="dt">restrict</span>: <span class="st">&#39;EA&#39;</span>,
+      <span class="dt">link</span>: <span class="kw">function</span> (scope, element, attrs) {
+        <span class="kw">var</span> el = <span class="ot">D3</span>.<span class="fu">select</span>(<span class="st">&#39;.thermometer&#39;</span>),
+            w = <span class="ot">attrs</span>.<span class="fu">width</span> || <span class="ot">el</span>.<span class="fu">node</span>().<span class="fu">clientWidth</span>,
+            h = <span class="ot">attrs</span>.<span class="fu">height</span> || <span class="ot">el</span>.<span class="fu">node</span>().<span class="fu">clientHeight</span>,
+            r = <span class="ot">Math</span>.<span class="fu">min</span>(w, h) / <span class="dv">2</span>,
+            pi = <span class="ot">Math</span>.<span class="fu">PI</span>;
+
+        <span class="kw">var</span> svg = <span class="ot">el</span>.<span class="fu">select</span>(<span class="st">&#39;svg&#39;</span>)
+              .<span class="fu">attr</span>(<span class="st">&#39;width&#39;</span>, w)
+              .<span class="fu">attr</span>(<span class="st">&#39;height&#39;</span>, h)
+              .<span class="fu">append</span>(<span class="st">&#39;g&#39;</span>)
+              .<span class="fu">attr</span>(<span class="st">&#39;transform&#39;</span>, <span class="st">&#39;translate(&#39;</span> + w/<span class="dv">2</span> + <span class="st">&#39;,&#39;</span> + h/<span class="dv">2</span> + <span class="st">&#39;)&#39;</span>);
+        <span class="co">// ...</span>
+      } 
+    };
+  });</code></pre>
 </section>
 </div>
 

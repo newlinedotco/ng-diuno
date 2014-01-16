@@ -1,4 +1,11 @@
 .reveal pre {
-  padding: 8px;
+  padding: 1.5em;
 }
 
+pre.sourceCode {
+  box-shadow: 0;
+}
+
+.reveal section img {
+  border: 0;
+}

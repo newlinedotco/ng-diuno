@@ -135,8 +135,8 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
                       currTemp = getTemp(ds);
                       p->setCurrentValue(currTemp);
                       break;
-                    default:
 #if DEBUG
+                    default:
                       Serial.print(F("Unknown action: "));
                       Serial.print(actionT);
                       Serial.print(F("\n"));
@@ -178,65 +178,7 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
   return true;
 }
 
-// boolean subscribe_handler(TinyWebServer& web_server)
-// {
-//    String pathstring = web_server.get_path();
-// #if DEBUG
-//     Serial.print(F("Parsed page from "));
-//     Serial.print(pathstring);
-//     Serial.print(F("\n"));
-// #endif
-
-//    int size = count_forward_slashes(pathstring);
-// #if DEBUG
-//    Serial.print(F("Count: "));
-//    Serial.print(size);
-//    Serial.print(F("\n"));
-// #endif
-
-//    char** parsed = (char**)malloc(sizeof(char *) * size);
-//    parse_path_string(pathstring.c_str(), size, parsed);
-
-//    if (parsed[2]) {
-//     int pinInt = atoi(parsed[2]);
-
-// #if DEBUG
-//     Serial.print(F("Subscribing to pin "));
-//     Serial.print(pinInt);
-//     Serial.print(F("\n"));
-// #endif
-
-//      Client& client = web_server.get_client();
-//      if (subscriber) {
-//       free(subscriber);
-//      }
-//      subscriber = &client;
-
-//      for(int j=0; j<size; j++){
-//        free(parsed[j]);
-//      }
-//      free(parsed);
-
-//      // client.print(F("HTTP 1.1 "));
-//      // client.print(pinInt);
-//      subscriber->println(F("HTTP/1.1 200 OK"));
-//      // web_server.send_error_code(200);
-//      // web_server.send_content_type("text/event-stream");
-//      subscriber->println("Content-Type: text/event-stream");
-//      subscriber->println("Cache-Control: no-cache");
-//      subscriber->println("Connection: keep-alive");
-//      subscriber->println();
-//      // web_server.end_headers();
-
-//      return false;
-//    } else {
-//     return true;
-//    }
-// }
-
 TinyWebServer::PathHandler handlers[] = {
-  // {"/pins/analog", TinyWebServer::GET, &analog_pin_handler},
-  // {"/pins/subscribe" "*", TinyWebServer::GET, &subscribe_handler},
   {"/pins/digital", TinyWebServer::POST, &digital_pin_handler},
   {"/pins", TinyWebServer::GET, &pins_handler},
   {"/", TinyWebServer::GET, &index_handler },

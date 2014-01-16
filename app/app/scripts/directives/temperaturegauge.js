@@ -10,7 +10,6 @@ angular.module('myApp')
       },
       restrict: 'EA',
       link: function (scope, element, attrs) {
-        console.log(D3);
         var el = D3.select('.thermometer'),
             w = attrs.width || el.node().clientWidth,
             h = attrs.height || el.node().clientHeight,
