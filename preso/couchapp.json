@@ -1,7 +1,0 @@
-{
-  "app": "app.js",
-  "db": "http://localhost:5984/remark",
-  "options": {
-    "okay_if_exists": true
-  }
-}

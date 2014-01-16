@@ -1,7 +1,0 @@
-{
-  "generator-reveal": {
-    "presentationTitle": "Powering the arduino with Angular",
-    "packageVersion": "0.0.0",
-    "useSass": true
-  }
-}
