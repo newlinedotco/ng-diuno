@@ -464,9 +464,9 @@ while(i < sLen) {
               p->setCurrentValue(currTemp);
               break;
           // ...
-
 ```
 -----------------------------
+
 ```c
 float getTemp(OneWire sensor){
   //returns the temperature from one DS18S20 in DEG Celsius

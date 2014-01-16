@@ -497,40 +497,47 @@ int i = <span class="dv">0</span>;
               p-&gt;<span class="fu">setCurrentValue</span>(currTemp);
               <span class="kw">break</span>;
           <span class="co">// ...</span></code></pre>
-<table>
-<col style="width: 40%" /><tbody>
-<tr class="odd">
-<td style="text-align: left;">```c float getTemp(OneWire sensor){ //returns the temperature from one DS18S20 in DEG Celsius byte data[12], addr[8]; float celsius, fahrenheit;</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">sensor.search(addr); sensor.reset(); sensor.select(addr); sensor.write(0x44,1); delay(1000);</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">byte present = sensor.reset(); sensor.select(addr); sensor.write(0xBE); // Read Scratchpad</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">for (int i = 0; i &lt; 9; i++) { data[i] = sensor.read(); }</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">sensor.reset_search(); byte MSB = data[1]; byte LSB = data[0];</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">int16_t raw = (data[1] &lt;&lt; 8) | data[0]; raw = raw &lt;&lt; 3; if (data[7] == 0x10) { raw = (raw &amp; 0xFFF0) + 12 - data[6]; }</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">celsius = (float)raw / 16.0; fahrenheit = celsius * 1.8 + 32.0; return fahrenheit; } ```</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">## Interface</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Finally, we want to show the data in a meaningful, <em>sexy</em> way...</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">## d3</td>
-</tr>
-</tbody>
-</table>
+</section>
+<section class="slide level2">
+
+<pre class="sourceCode c"><code class="sourceCode c"><span class="dt">float</span> getTemp(OneWire sensor){
+  <span class="co">//returns the temperature from one DS18S20 in DEG Celsius</span>
+  byte data[<span class="dv">12</span>], addr[<span class="dv">8</span>];
+  <span class="dt">float</span> celsius, fahrenheit;
+
+  sensor.search(addr);
+  sensor.reset();
+  sensor.select(addr);
+  sensor.write(<span class="bn">0x44</span>,<span class="dv">1</span>);
+  delay(<span class="dv">1000</span>);
+
+  byte present = sensor.reset();
+  sensor.select(addr);  
+  sensor.write(<span class="bn">0xBE</span>); <span class="co">// Read Scratchpad</span>
+
+  <span class="kw">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; <span class="dv">9</span>; i++) { data[i] = sensor.read(); }
+
+  sensor.reset_search();
+  byte MSB = data[<span class="dv">1</span>];
+  byte LSB = data[<span class="dv">0</span>];
+
+  <span class="dt">int16_t</span> raw = (data[<span class="dv">1</span>] &lt;&lt; <span class="dv">8</span>) | data[<span class="dv">0</span>]; raw = raw &lt;&lt; <span class="dv">3</span>;
+  <span class="kw">if</span> (data[<span class="dv">7</span>] == <span class="bn">0x10</span>) { raw = (raw &amp; <span class="bn">0xFFF0</span>) + <span class="dv">12</span> - data[<span class="dv">6</span>]; }
+
+  celsius = (<span class="dt">float</span>)raw / <span class="fl">16.0</span>;
+  fahrenheit = celsius * <span class="fl">1.8</span> + <span class="fl">32.0</span>;
+  <span class="kw">return</span> fahrenheit;
+}</code></pre>
+</section>
+<section id="interface" class="slide level2">
+<h1>Interface</h1>
+<p>Finally, we want to show the data in a meaningful, <em>sexy</em> way...</p>
+</section>
+<section id="d3" class="slide level2">
+<h1>d3</h1>
+</section>
+<section class="slide level2">
+
 <pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">angular</span>.<span class="fu">module</span>(<span class="st">&#39;myApp&#39;</span>)
   .<span class="fu">service</span>(<span class="st">&#39;D3&#39;</span>, <span class="kw">function</span> <span class="fu">D3</span>() { <span class="kw">return</span> <span class="ot">window</span>.<span class="fu">d3</span>; })
   .<span class="fu">directive</span>(<span class="st">&#39;temperatureGauge&#39;</span>, <span class="kw">function</span>(D3) {
