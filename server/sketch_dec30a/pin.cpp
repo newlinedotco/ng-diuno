@@ -34,7 +34,7 @@ void Pin::InitializeState()
       digitalWrite(_pin, LOW);
   }
 }
-uint8_t Pin::getState(){
+float Pin::getState(){
   switch(_type) {
     case ONEWIRE:
       return _currentValue;

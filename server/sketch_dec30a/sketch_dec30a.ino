@@ -35,21 +35,25 @@ Pin pins[11] = {
 
 OneWire ds(7);
 
-Client* subscribers[1];
-int num_subscribers = 0;
+Client* subscriber;
 
 int numPins = 3;
 
 static uint8_t mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
 // Don't forget to modify the IP to an available one on your home network
-byte ip[] = { 10, 0, 1, 32 };
+byte ip[] = { 192, 168, 0, 67 };
 
 boolean index_handler(TinyWebServer& web_server) {
-  web_server << "<html><head><title>Web server</title></head>";
-  web_server << "<body>";
-  web_server << "<script id=\"appscript\" src=\"http://" << HOST << "/scripts/scripts.js\"></script>";
-  web_server << "</body></html>";
+  web_server.print(F("<html><head><title>Web server</title></head>"));
+  web_server.print(F("<body>"));
+  web_server.print(F("<script>window.ip=\""));
+  web_server.print(ip_to_str(ip));
+  web_server.print(F("\"</script>"));
+  web_server.print(F("<script id=\"appscript\" src=\"http://"));
+  web_server.print(HOST);
+  web_server.print(F("/scripts/scripts.js\"></script>"));
+  web_server.print(F("</body></html>"));
   return true;
 }
 
@@ -175,58 +179,65 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
   return true;
 }
 
-boolean subscribe_handler(TinyWebServer& web_server)
-{
-   String pathstring = web_server.get_path();
-#if DEBUG
-    Serial.print(F("Parsed page from "));
-    Serial.print(pathstring);
-    Serial.print(F("\n"));
-#endif
+// boolean subscribe_handler(TinyWebServer& web_server)
+// {
+//    String pathstring = web_server.get_path();
+// #if DEBUG
+//     Serial.print(F("Parsed page from "));
+//     Serial.print(pathstring);
+//     Serial.print(F("\n"));
+// #endif
 
-   int size = count_forward_slashes(pathstring);
-#if DEBUG
-   Serial.print(F("Count: "));
-   Serial.print(size);
-   Serial.print(F("\n"));
-#endif
+//    int size = count_forward_slashes(pathstring);
+// #if DEBUG
+//    Serial.print(F("Count: "));
+//    Serial.print(size);
+//    Serial.print(F("\n"));
+// #endif
 
-   char** parsed = (char**)malloc(sizeof(char *) * size);
-   parse_path_string(pathstring.c_str(), size, parsed);
+//    char** parsed = (char**)malloc(sizeof(char *) * size);
+//    parse_path_string(pathstring.c_str(), size, parsed);
 
-   if (parsed[2]) {
-    int pinInt = atoi(parsed[2]);
+//    if (parsed[2]) {
+//     int pinInt = atoi(parsed[2]);
 
-#if DEBUG
-    Serial.print(F("Subscribing to pin "));
-    Serial.print(pinInt);
-    Serial.print(F("\n"));
-#endif
-    
-   }
+// #if DEBUG
+//     Serial.print(F("Subscribing to pin "));
+//     Serial.print(pinInt);
+//     Serial.print(F("\n"));
+// #endif
 
-   Client& client = web_server.get_client();
-   subscribers[num_subscribers++] = &client;
+//      Client& client = web_server.get_client();
+//      if (subscriber) {
+//       free(subscriber);
+//      }
+//      subscriber = &client;
 
-   for(int j=0; j<size; j++){
-     free(parsed[j]);
-   }
-   free(parsed);
+//      for(int j=0; j<size; j++){
+//        free(parsed[j]);
+//      }
+//      free(parsed);
 
-   client.println("HTTP/1.1 200 OK");
-   client.println("Content-Type: text/event-stream;charset=utf-8");
-   client.println("Cache-Control: no-cache");
-   client.println("Connection: keep-alive");
-   client.println();
+//      // client.print(F("HTTP 1.1 "));
+//      // client.print(pinInt);
+//      subscriber->println(F("HTTP/1.1 200 OK"));
+//      // web_server.send_error_code(200);
+//      // web_server.send_content_type("text/event-stream");
+//      subscriber->println("Content-Type: text/event-stream");
+//      subscriber->println("Cache-Control: no-cache");
+//      subscriber->println("Connection: keep-alive");
+//      subscriber->println();
+//      // web_server.end_headers();
 
-   client.println("data: ok\n");
-
-   return false;
-}
+//      return false;
+//    } else {
+//     return true;
+//    }
+// }
 
 TinyWebServer::PathHandler handlers[] = {
   // {"/pins/analog", TinyWebServer::GET, &analog_pin_handler},
-  {"/pins/subscribe" "*", TinyWebServer::GET, &subscribe_handler},
+  // {"/pins/subscribe" "*", TinyWebServer::GET, &subscribe_handler},
   {"/pins/digital", TinyWebServer::POST, &digital_pin_handler},
   {"/pins", TinyWebServer::GET, &pins_handler},
   {"/", TinyWebServer::GET, &index_handler },
@@ -251,6 +262,7 @@ float getTemp(OneWire sensor){
   //returns the temperature from one DS18S20 in DEG Celsius
   byte data[12];
   byte addr[8];
+  float celsius, fahrenheit;
 
   if ( !sensor.search(addr)) {
      //no more sensors on chain, reset search
@@ -271,11 +283,11 @@ float getTemp(OneWire sensor){
   sensor.reset();
   sensor.select(addr);
   sensor.write(0x44,1); // start conversion, with parasite power on at the end
+  delay(1000);
 
   byte present = sensor.reset();
   sensor.select(addr);  
   sensor.write(0xBE); // Read Scratchpad
-
 
   for (int i = 0; i < 9; i++) { // we need 9 bytes
     data[i] = sensor.read();
@@ -286,10 +298,18 @@ float getTemp(OneWire sensor){
   byte MSB = data[1];
   byte LSB = data[0];
 
-  float tempRead = ((MSB << 8) | LSB); //using two's compliment
-  float TemperatureSum = tempRead / 16;
+  int16_t raw = (data[1] << 8) | data[0];
+  raw = raw << 3;
+  if (data[7] == 0x10) {
+    raw = (raw & 0xFFF0) + 12 - data[6];
+  }
 
-  return ((TemperatureSum*9)/5) + 32;
+  celsius = (float)raw / 16.0;
+  fahrenheit = celsius * 1.8 + 32.0;
+  // float tempRead = ((MSB << 8) | LSB); //using two's compliment
+  // float TemperatureSum = tempRead / 16;
+
+  return fahrenheit;
 }
 
 void setup() {
@@ -351,14 +371,21 @@ void setup() {
 void loop() {
   web.process();
 
-  for(int i=0; i<num_subscribers; i++){
-    Client& client = *subscribers[i];
-    if (client.connected()){
-      client.println("data: hi\n");
-      client.flush();
+  if (subscriber != NULL) {
+    if (subscriber->connected()){
+#if DEBUG
+      Serial.println(F("Sending event"));
+#endif
+      subscriber->println("data: hi\n");
     } else {
+#if DEBUG
+      Serial.println("Client not connected?");
+#endif
+      if (subscriber->available()) {
+        Serial.println("Client available");
+      }
       // Handle multiple subscribers?
-      num_subscribers--;
+      // num_subscribers--;
     }
   }
 }

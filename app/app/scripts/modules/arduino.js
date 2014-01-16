@@ -14,7 +14,7 @@ angular.module('fsArduino', [])
 })
 .provider('Arduino', function() {
 
-  var rootUrl = 'http://10.0.1.32';
+  var rootUrl = window.ip ? 'http://' + window.ip : 'http://192.168.0.67';
 
   this.setRootUrl = function(u) {
     rootUrl = u || rootUrl;
@@ -55,15 +55,16 @@ angular.module('fsArduino', [])
         }).then(function(data) {
           return data.data;
         });
-      },
-      subscribeToPin: function(pin) {
-        return $http({
-          method: 'GET',
-          url: rootUrl + '/pins/subscribe/' + pin
-        }).then(function(data) {
-          console.log('DATA FROM SUBSCRIBE',data);
-        });
       }
+      // subscribeToPin: function(pin) {
+      //   return $http({
+      //     method: 'GET',
+      //     url: rootUrl + '/pins/subscribe/' + pin,
+      //     headers: {'Accept': 'text/event-stream'}
+      //   }).then(function(data) {
+      //     console.log('DATA FROM SUBSCRIBE',data);
+      //   });
+      // }
     };
 
     return service;

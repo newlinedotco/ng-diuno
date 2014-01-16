@@ -2,7 +2,7 @@
 
 (function() {
 
-  var scriptTag = document.getElementsByTagName('script')[0];
+  var scriptTag = document.getElementsByTagName('script')[1];
   var matches = scriptTag.src.match(/^http[s]?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
   var host = matches[0];
   var body  = document.getElementsByTagName('body')[0];

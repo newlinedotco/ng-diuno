@@ -22,7 +22,7 @@ public:
   float analogValue;
   uint8_t getPin();
   void    setPin(uint8_t);
-  uint8_t getState();
+  float   getState();
   uint8_t setState(uint8_t state);
 
   void    setMode(uint8_t);

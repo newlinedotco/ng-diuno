@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('myApp')
-  .directive('digitalPin', function(HOSTED_URL, Arduino) {
+  .directive('digitalPin', function($timeout, HOSTED_URL, Arduino) {
     return {
       templateUrl: HOSTED_URL() + '/views/digitalPin.html',
       restrict: 'A',
@@ -41,6 +41,18 @@ angular.module('myApp')
           .then(function(data) {
             console.log('subscribe', data);
           });
+        };
+
+        scope.startPolling = function() {
+          (function poll() {
+            Arduino.setPins([{
+              pin: scope.ngModel.pin,
+              action: 'getTemp'
+            }]).then(function(data) {
+              scope.ngModel = findByPinNumber(data.pins);
+              $timeout(poll, 1000);
+            });
+          })();
         };
 
         scope.toggle = function() {
