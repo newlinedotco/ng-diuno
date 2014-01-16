@@ -504,6 +504,8 @@ Finally, we want to show the data in a meaningful, _sexy_ way...
 
 ## d3
 
+-------------------------------------
+
 ```javascript
 angular.module('myApp')
   .service('D3', function D3() { return window.d3; })
