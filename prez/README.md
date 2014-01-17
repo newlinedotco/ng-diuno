@@ -3,7 +3,7 @@
 
 ## Ari Lerner, Fullstack.io
 
-- Author of [ng-book](https://ng-book.com)
+- Author of [ng-book](https://ng-book.com) and [ng-newsletter](http://ng-newsletter.com)
 - Author of a few others ([D3 on Angular](http://leanpub/d3angularjs), [Riding Rails with AngularJS](https://leanpub.com/angularjs-rails))
 - Teacher at [HackReactor](http://hackreactor.com)
 - Cofounder of [Fullstack.io](http://fullstack.io)
@@ -114,8 +114,6 @@ _DHCP_ is also supported
 #### Embed HTML in Arduino
 #### Read/Send from SD card
 #### Load from remote server
-
-## Using browser functionality
 
 -------------------------
 
