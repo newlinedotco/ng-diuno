@@ -1,5 +1,5 @@
 .reveal pre {
-  padding: 1.5em;
+  padding: 1.2em;
 }
 
 pre.sourceCode {
@@ -8,4 +8,12 @@ pre.sourceCode {
 
 .reveal section img {
   border: 0;
+}
+
+.emp {
+  color: #DD4B39;
+}
+
+.sourceCode .co {
+  color: #E98662;
 }

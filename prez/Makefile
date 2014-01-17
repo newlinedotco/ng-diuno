@@ -8,3 +8,10 @@ all:
 						-V highlight-style="${STYLE}" \
 						-t ${FORMAT} -s README.md \
 						-o index.html
+
+pdf:
+	pandoc -V theme=${THEME} --variable transition="linear" \
+						--template template.revealjs \
+						-V highlight-style="${STYLE}" \
+						-t ${FORMAT} -s README.md \
+						-o index.pdf

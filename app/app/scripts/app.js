@@ -5,9 +5,13 @@ angular.module('myApp', [
   'ngRoute'
 ])
 .constant('HOSTED_URL', function() {
-  var scriptTag = document.getElementById('appscript');
-  var matches = scriptTag.src.match(/^http[s]?\:\/\/([^\/?#]+)(?:[#]?|$)/i);
-  return matches[0];
+  try {
+    var scriptTag = document.getElementById('appscript');
+    var matches = scriptTag.src.match(/^http[s]?\:\/\/([^\/?#]+)(?:[#]?|$)/i);
+    return matches[0];
+  } catch(e) {
+    return 'http://localhost:9000';
+  }
 })
 .config(['$httpProvider', function($httpProvider) {
   $httpProvider.defaults.useXDomain = true;

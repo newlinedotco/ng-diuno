@@ -9,26 +9,15 @@
 - Cofounder of [Fullstack.io](http://fullstack.io)
 - Background in distributed computing and infrastructure (really)
 
-## Obligatory
+## What
 
-![](images/ng-book.png)
-![](images/d3.png)
-![](images/rails.png)
+Let's prototype a <span class="emp">$3.2 billion dollar</span> business in less than 20 minutes (oversimplification) using the Arduino (an open-source hardware platform) and Angular (an awesome prototyping platform).
 
-## Why Angular?
-
-## Why Arduino?
+## Arduino?
 
 - Embedded systems
 - Wearable computing
 - Low-power systems
-
-## Examples
-
-- Nest
-- Pebble
-- Phillips Hue
-- Bellini Wemo
 
 ## Overview
 
@@ -85,11 +74,7 @@ boolean index_handler(TinyWebServer& web_server) {
   web_server.print(F("<body></body></html>"));
   return true;
 }
-```
 
-----------------------------
-
-```c
 // Handlers
 TinyWebServer::PathHandler handlers[] = {
   {"/pins/digital", TinyWebServer::POST, &digital_pin_handler},
@@ -98,11 +83,8 @@ TinyWebServer::PathHandler handlers[] = {
   {NULL},
 };
 
-// Headers to process
 const char* headers[] = {
-  "Content-Length",
-  "X-Action-Len",
-  NULL
+  "Content-Length", "X-Action-Len", NULL
 };
 TinyWebServer web = TinyWebServer(handlers, headers);
 // ...
@@ -111,12 +93,10 @@ void loop() {
 };
 ```
 
-## Connecting to the internet
+## Connecting to the net
 
 - Ethernet shield
 - Wifi shield
-
---------------------------
 
 ```c
 #include <Ethernet.h>
@@ -131,40 +111,11 @@ _DHCP_ is also supported
 
 ## Options
 
-## Embed directly in Arduino code
+#### Embed HTML in Arduino
+#### Read/Send from SD card
+#### Load from remote server
 
-### Pros
-
-- Simple
-
-### Cons
-
-- Hard to update
-- Space limitations (32kb is not a lot of space)
-
-## Read/Send from SD card
-
-### Pros
-
-- Simple
-- Tons of space (4+ gigs)
-
-### Cons
-
-- Hard to update
-
-## Load from remote server
-
-### Pros
-
-- Simple
-- Easy to update
-
-### Cons
-
-- Need internet connection
-
-## Browser
+## Using browser functionality
 
 -------------------------
 
@@ -182,37 +133,12 @@ boolean index_handler(TinyWebServer& web_server) {
 
 ## But where's the Angular
 
-------------------------------
+----------------------------------
 
 ```javascript
 (function() {
   var scriptTag = document.getElementsByTagName('script')[0];
-  var matches = scriptTag.src.match(/^http[s]?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
-  var host = matches[0];
-  var body  = document.getElementsByTagName('body')[0];
-  var head  = document.getElementsByTagName('head')[0];
-
-  var createLinkTag = function(src) {
-    var link = document.createElement('link');
-    link.setAttribute('rel', 'stylesheet');
-    link.setAttribute('type', 'text/css');
-    link.setAttribute('href', host + '/' + src);
-    head.appendChild(link);
-  };
-
-  var createScriptTag = function(src, async) {
-    var script   = document.createElement('script');
-    script.setAttribute('src', host + '/' + src);
-    script.async = async || false;
-
-    body.appendChild(script);
-  };
   // ...
-```
-
-----------------------------------
-
-```javascript
   createLinkTag('styles/main.css');
 
   var arr = [
@@ -234,6 +160,7 @@ boolean index_handler(TinyWebServer& web_server) {
   body.appendChild(app);
 })();
 ```
+
 -------------------
 
 ![](/images/load_in_browser.png)
@@ -264,16 +191,15 @@ angular.module('fsArduino', [])
     rootUrl = u || rootUrl;
   };
 
-  this.$get = function($q, $http) {
-    var actions = {
-      'getTemp': 0
+  this.$get = function($http) {
+    return {
+      getPins: function() {},
+      setPins: function() {}
     };
-  //...
+  }
 
 });
 ```
-
-------------------------------
 
 ```javascript
 angular.module('myApp', [
@@ -281,23 +207,6 @@ angular.module('myApp', [
 ])
 .config(function(ArduinoProvider) {
   ArduinoProvider.setRootUrl(window.ip);
-});
-```
-
-## Interaction
-
------------------------------------
-
-```javascript
-angular.module('fsArduino', [])
-.provider('Arduino', function() {
-  // ...
-  this.$get = function($http) {
-    return {
-      getPins: function() {},
-      setPins: function() {}
-    };
-  }
 });
 ```
 
@@ -330,18 +239,11 @@ boolean pins_handler(TinyWebServer& web_server) {
   web_server.send_error_code(200);
   web_server.send_content_type("application/javascript");
   web_server.end_headers();
-
   pinsToString(web_server);
   return true;
 }
-```
-
------------------------
-
-```c
+// ...
 bool pinsToString(TinyWebServer& web_server) {
-  UpdatePinsState();
-
   web_server << F("{\"pins\":[");
   int len = numPins;
   for(int i=0; i<len; i++){
@@ -359,15 +261,21 @@ bool pinsToString(TinyWebServer& web_server) {
 
 ## Modifying pin states
 
-Angular works with JSON by default (just javascript), but the Arduino does not...
+Angular works with JSON by default (just javascript), but the Arduino does not... However, parsing a schemaless data structure in a strictly typed language is... <span class="emp">difficult</span>.
 
-## aJSON.h
+## Create our own protocol
 
-The JSON parsing library written in c for the Arduino. However, parsing a schemaless data structure in a strictly typed language is... difficult.
+Turn JSON from:
 
-## Creating our own data-structure
+```javascript
+{ pin: 7, action: 'getTemp' } (24 bytes)
+```
 
-Instead of relying on JSON, we can create our own protocol for handling interaction between Angular and the Arduino, we can define our own protocol.
+to
+
+```c
+p7a0 (4 bytes)
+```
 
 ## Actions
 
@@ -408,19 +316,6 @@ setPins: function(pins) {
   });
 }
 ```
---------------------------
-
-This turns the JSON from:
-
-```javascript
-{ pin: 7, action: 'getTemp' } (24 bytes)
-```
-
-into
-
-```c
-p7a0 (4 bytes)
-```
 
 ## Parsing in c
 
@@ -433,10 +328,12 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
   // Get the action length
   const char* action_str_len = web_server.get_header_value("X-Action-Len");
   int len = atoi(action_str_len);
+  
   // Get the request data based on the length
   char* data = (char*)malloc(len);
   if (data) memset(data, 0, len);
   get_request_data(web_server, len, data);
+  
   // ...
 };
 ```
@@ -481,7 +378,7 @@ float getTemp(OneWire sensor){
 
   byte present = sensor.reset();
   sensor.select(addr);  
-  sensor.write(0xBE); // Read Scratchpad
+  sensor.write(0xBE);
 
   for (int i = 0; i < 9; i++) { data[i] = sensor.read(); }
 
@@ -531,3 +428,13 @@ angular.module('myApp')
     };
   });
 ```
+
+## Learn more
+
+![](images/ng-book.png)
+![](images/d3.png)
+![](images/rails.png)
+
+## Thanks
+
+### Ari Lerner, Fullstack.io

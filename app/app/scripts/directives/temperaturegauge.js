@@ -52,7 +52,7 @@ angular.module('myApp')
 
         var display = svg.append('text')
             .text('72')
-            .attr('y', 20);
+            .attr('y', 25);
 
         scope.$watch('ngModel', function(n) {
           if (!n) { return; }

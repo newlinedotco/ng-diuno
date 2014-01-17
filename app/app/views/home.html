@@ -1,12 +1,9 @@
-<div class="bar bar-header bar-calm">
-  <h1 class="title">ngNest</h1>
+<div class='content'>
+  <h1>ngTemp</h1>
+  <div class="controls">
+    <a ng-click="raiseTemp()" id="up" ng-class="{glow: raisingTemp}"><i class="icon ion-chevron-up"></i></a>
+    <a ng-click="lowerTemp()" id="down" ng-class="{glow: loweringTemp}"><i class="icon ion-chevron-down"></i></a>
+  </div>
+  <div temperature-gauge ng-model='temperature'></div>
+
 </div>
-<content class='container content' padded="true">
-  <div class="row">
-    <button ng-click="lowerTemp()" class="col button button-positive">-</button>
-    <button ng-click="raiseTemp()" class="col button button-assertive">+</button>
-  </div>
-  <div class="row">
-    <div class="col-50" temperature-gauge ng-model='temperature'></div>
-  </div>
-</content>

@@ -62,28 +62,16 @@
 <li>Background in distributed computing and infrastructure (really)</li>
 </ul>
 </section>
-<section id="obligatory" class="slide level2">
-<h1>Obligatory</h1>
-<p><img src="images/ng-book.png" /> <img src="images/d3.png" /> <img src="images/rails.png" /></p>
+<section id="what" class="slide level2">
+<h1>What</h1>
+<p>Let's prototype a <span class="emp">$3.2 billion dollar</span> business in less than 20 minutes (oversimplification) using the Arduino (an open-source hardware platform) and Angular (an awesome prototyping platform).</p>
 </section>
-<section id="why-angular" class="slide level2">
-<h1>Why Angular?</h1>
-</section>
-<section id="why-arduino" class="slide level2">
-<h1>Why Arduino?</h1>
+<section id="arduino" class="slide level2">
+<h1>Arduino?</h1>
 <ul>
 <li>Embedded systems</li>
 <li>Wearable computing</li>
 <li>Low-power systems</li>
-</ul>
-</section>
-<section id="examples" class="slide level2">
-<h1>Examples</h1>
-<ul>
-<li>Nest</li>
-<li>Pebble</li>
-<li>Phillips Hue</li>
-<li>Bellini Wemo</li>
 </ul>
 </section>
 <section id="overview" class="slide level2">
@@ -139,11 +127,9 @@ boolean index_handler(TinyWebServer&amp; web_server) {
   web_server.print(F(<span class="st">&quot;&lt;html&gt;&lt;head&gt;&lt;title&gt;Web server&lt;/title&gt;&lt;/head&gt;&quot;</span>));
   web_server.print(F(<span class="st">&quot;&lt;body&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span>));
   <span class="kw">return</span> true;
-}</code></pre>
-</section>
-<section class="slide level2">
+}
 
-<pre class="sourceCode c"><code class="sourceCode c"><span class="co">// Handlers</span>
+<span class="co">// Handlers</span>
 TinyWebServer::PathHandler handlers[] = {
   {<span class="st">&quot;/pins/digital&quot;</span>, TinyWebServer::POST, &amp;digital_pin_handler},
   {<span class="st">&quot;/pins&quot;</span>, TinyWebServer::GET, &amp;pins_handler},
@@ -151,11 +137,8 @@ TinyWebServer::PathHandler handlers[] = {
   {NULL},
 };
 
-<span class="co">// Headers to process</span>
 <span class="dt">const</span> <span class="dt">char</span>* headers[] = {
-  <span class="st">&quot;Content-Length&quot;</span>,
-  <span class="st">&quot;X-Action-Len&quot;</span>,
-  NULL
+  <span class="st">&quot;Content-Length&quot;</span>, <span class="st">&quot;X-Action-Len&quot;</span>, NULL
 };
 TinyWebServer web = TinyWebServer(handlers, headers);
 <span class="co">// ...</span>
@@ -163,15 +146,12 @@ TinyWebServer web = TinyWebServer(handlers, headers);
   web.process();
 };</code></pre>
 </section>
-<section id="connecting-to-the-internet" class="slide level2">
-<h1>Connecting to the internet</h1>
+<section id="connecting-to-the-net" class="slide level2">
+<h1>Connecting to the net</h1>
 <ul>
 <li>Ethernet shield</li>
 <li>Wifi shield</li>
 </ul>
-</section>
-<section class="slide level2">
-
 <pre class="sourceCode c"><code class="sourceCode c"><span class="ot">#include &lt;Ethernet.h&gt;</span>
 byte ip[] = { <span class="dv">192</span>, <span class="dv">168</span>, <span class="dv">0</span>, <span class="dv">67</span> };
 <span class="co">// ...</span>
@@ -183,45 +163,12 @@ Ethernet.begin(mac, ip);</code></pre>
 </section>
 <section id="options" class="slide level2">
 <h1>Options</h1>
+<h4 id="embed-html-in-arduino">Embed HTML in Arduino</h4>
+<h4 id="readsend-from-sd-card">Read/Send from SD card</h4>
+<h4 id="load-from-remote-server">Load from remote server</h4>
 </section>
-<section id="embed-directly-in-arduino-code" class="slide level2">
-<h1>Embed directly in Arduino code</h1>
-<h3 id="pros">Pros</h3>
-<ul>
-<li>Simple</li>
-</ul>
-<h3 id="cons">Cons</h3>
-<ul>
-<li>Hard to update</li>
-<li>Space limitations (32kb is not a lot of space)</li>
-</ul>
-</section>
-<section id="readsend-from-sd-card" class="slide level2">
-<h1>Read/Send from SD card</h1>
-<h3 id="pros-1">Pros</h3>
-<ul>
-<li>Simple</li>
-<li>Tons of space (4+ gigs)</li>
-</ul>
-<h3 id="cons-1">Cons</h3>
-<ul>
-<li>Hard to update</li>
-</ul>
-</section>
-<section id="load-from-remote-server" class="slide level2">
-<h1>Load from remote server</h1>
-<h3 id="pros-2">Pros</h3>
-<ul>
-<li>Simple</li>
-<li>Easy to update</li>
-</ul>
-<h3 id="cons-2">Cons</h3>
-<ul>
-<li>Need internet connection</li>
-</ul>
-</section>
-<section id="browser" class="slide level2">
-<h1>Browser</h1>
+<section id="using-browser-functionality" class="slide level2">
+<h1>Using browser functionality</h1>
 </section>
 <section class="slide level2">
 
@@ -242,31 +189,8 @@ boolean index_handler(TinyWebServer<span class="er">&amp;</span> web_server) {
 
 <pre class="sourceCode javascript"><code class="sourceCode javascript">(<span class="kw">function</span>() {
   <span class="kw">var</span> scriptTag = <span class="ot">document</span>.<span class="fu">getElementsByTagName</span>(<span class="st">&#39;script&#39;</span>)[<span class="dv">0</span>];
-  <span class="kw">var</span> matches = <span class="ot">scriptTag</span>.<span class="ot">src</span>.<span class="fu">match</span>(<span class="ot">/</span><span class="fl">^</span><span class="ot">http</span><span class="bn">[s]</span><span class="fl">?\:\/\/(</span><span class="bn">[</span><span class="fl">^\/</span><span class="bn">?#]</span><span class="fl">+)(?</span><span class="ot">:</span><span class="bn">[</span><span class="fl">\/</span><span class="bn">?#]</span><span class="fl">|</span><span class="ot">$</span><span class="fl">)</span><span class="ot">/i</span>);
-  <span class="kw">var</span> host = matches[<span class="dv">0</span>];
-  <span class="kw">var</span> body  = <span class="ot">document</span>.<span class="fu">getElementsByTagName</span>(<span class="st">&#39;body&#39;</span>)[<span class="dv">0</span>];
-  <span class="kw">var</span> head  = <span class="ot">document</span>.<span class="fu">getElementsByTagName</span>(<span class="st">&#39;head&#39;</span>)[<span class="dv">0</span>];
-
-  <span class="kw">var</span> createLinkTag = <span class="kw">function</span>(src) {
-    <span class="kw">var</span> link = <span class="ot">document</span>.<span class="fu">createElement</span>(<span class="st">&#39;link&#39;</span>);
-    <span class="ot">link</span>.<span class="fu">setAttribute</span>(<span class="st">&#39;rel&#39;</span>, <span class="st">&#39;stylesheet&#39;</span>);
-    <span class="ot">link</span>.<span class="fu">setAttribute</span>(<span class="st">&#39;type&#39;</span>, <span class="st">&#39;text/css&#39;</span>);
-    <span class="ot">link</span>.<span class="fu">setAttribute</span>(<span class="st">&#39;href&#39;</span>, host + <span class="st">&#39;/&#39;</span> + src);
-    <span class="ot">head</span>.<span class="fu">appendChild</span>(link);
-  };
-
-  <span class="kw">var</span> createScriptTag = <span class="kw">function</span>(src, async) {
-    <span class="kw">var</span> script   = <span class="ot">document</span>.<span class="fu">createElement</span>(<span class="st">&#39;script&#39;</span>);
-    <span class="ot">script</span>.<span class="fu">setAttribute</span>(<span class="st">&#39;src&#39;</span>, host + <span class="st">&#39;/&#39;</span> + src);
-    <span class="ot">script</span>.<span class="fu">async</span> = async || <span class="kw">false</span>;
-
-    <span class="ot">body</span>.<span class="fu">appendChild</span>(script);
-  };
-  <span class="co">// ...</span></code></pre>
-</section>
-<section class="slide level2">
-
-<pre class="sourceCode javascript"><code class="sourceCode javascript">  <span class="fu">createLinkTag</span>(<span class="st">&#39;styles/main.css&#39;</span>);
+  <span class="co">// ...</span>
+  <span class="fu">createLinkTag</span>(<span class="st">&#39;styles/main.css&#39;</span>);
 
   <span class="kw">var</span> arr = [
     <span class="st">&#39;scripts/modules/arduino.js&#39;</span>,
@@ -318,37 +242,19 @@ boolean index_handler(TinyWebServer<span class="er">&amp;</span> web_server) {
     rootUrl = u || rootUrl;
   };
 
-  <span class="kw">this</span>.<span class="fu">$get</span> = <span class="kw">function</span>($q, $http) {
-    <span class="kw">var</span> actions = {
-      <span class="st">&#39;getTemp&#39;</span>: <span class="dv">0</span>
-    };
-  <span class="co">//...</span>
-
-});</code></pre>
-</section>
-<section class="slide level2">
-
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">angular</span>.<span class="fu">module</span>(<span class="st">&#39;myApp&#39;</span>, [
-  <span class="st">&#39;fsArduino&#39;</span>
-])
-.<span class="fu">config</span>(<span class="kw">function</span>(ArduinoProvider) {
-  <span class="ot">ArduinoProvider</span>.<span class="fu">setRootUrl</span>(<span class="ot">window</span>.<span class="fu">ip</span>);
-});</code></pre>
-</section>
-<section id="interaction" class="slide level2">
-<h1>Interaction</h1>
-</section>
-<section class="slide level2">
-
-<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">angular</span>.<span class="fu">module</span>(<span class="st">&#39;fsArduino&#39;</span>, [])
-.<span class="fu">provider</span>(<span class="st">&#39;Arduino&#39;</span>, <span class="kw">function</span>() {
-  <span class="co">// ...</span>
   <span class="kw">this</span>.<span class="fu">$get</span> = <span class="kw">function</span>($http) {
     <span class="kw">return</span> {
       <span class="dt">getPins</span>: <span class="kw">function</span>() {},
       <span class="dt">setPins</span>: <span class="kw">function</span>() {}
     };
   }
+
+});</code></pre>
+<pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="ot">angular</span>.<span class="fu">module</span>(<span class="st">&#39;myApp&#39;</span>, [
+  <span class="st">&#39;fsArduino&#39;</span>
+])
+.<span class="fu">config</span>(<span class="kw">function</span>(ArduinoProvider) {
+  <span class="ot">ArduinoProvider</span>.<span class="fu">setRootUrl</span>(<span class="ot">window</span>.<span class="fu">ip</span>);
 });</code></pre>
 </section>
 <section id="summary-of-hardware-hacking" class="slide level2">
@@ -379,16 +285,11 @@ boolean pins_handler(TinyWebServer&amp; web_server) {
   web_server.send_error_code(<span class="dv">200</span>);
   web_server.send_content_type(<span class="st">&quot;application/javascript&quot;</span>);
   web_server.end_headers();
-
   pinsToString(web_server);
   <span class="kw">return</span> true;
-}</code></pre>
-</section>
-<section class="slide level2">
-
-<pre class="sourceCode c"><code class="sourceCode c">bool pinsToString(TinyWebServer&amp; web_server) {
-  UpdatePinsState();
-
+}
+<span class="co">// ...</span>
+bool pinsToString(TinyWebServer&amp; web_server) {
   web_server &lt;&lt; F(<span class="st">&quot;{</span><span class="ch">\&quot;</span><span class="st">pins</span><span class="ch">\&quot;</span><span class="st">:[&quot;</span>);
   <span class="dt">int</span> len = numPins;
   <span class="kw">for</span>(<span class="dt">int</span> i=<span class="dv">0</span>; i&lt;len; i++){
@@ -405,15 +306,14 @@ boolean pins_handler(TinyWebServer&amp; web_server) {
 </section>
 <section id="modifying-pin-states" class="slide level2">
 <h1>Modifying pin states</h1>
-<p>Angular works with JSON by default (just javascript), but the Arduino does not...</p>
+<p>Angular works with JSON by default (just javascript), but the Arduino does not... However, parsing a schemaless data structure in a strictly typed language is... <span class="emp">difficult</span>.</p>
 </section>
-<section id="ajson.h" class="slide level2">
-<h1>aJSON.h</h1>
-<p>The JSON parsing library written in c for the Arduino. However, parsing a schemaless data structure in a strictly typed language is... difficult.</p>
-</section>
-<section id="creating-our-own-data-structure" class="slide level2">
-<h1>Creating our own data-structure</h1>
-<p>Instead of relying on JSON, we can create our own protocol for handling interaction between Angular and the Arduino, we can define our own protocol.</p>
+<section id="create-our-own-protocol" class="slide level2">
+<h1>Create our own protocol</h1>
+<p>Turn JSON from:</p>
+<pre class="sourceCode javascript"><code class="sourceCode javascript">{ <span class="dt">pin</span>: <span class="dv">7</span>, <span class="dt">action</span>: <span class="st">&#39;getTemp&#39;</span> } (<span class="dv">24</span> bytes)</code></pre>
+<p>to</p>
+<pre class="sourceCode c"><code class="sourceCode c">p7a0 (<span class="dv">4</span> bytes)</code></pre>
 </section>
 <section id="actions" class="slide level2">
 <h1>Actions</h1>
@@ -451,13 +351,6 @@ boolean pins_handler(TinyWebServer&amp; web_server) {
   });
 }</code></pre>
 </section>
-<section class="slide level2">
-
-<p>This turns the JSON from:</p>
-<pre class="sourceCode javascript"><code class="sourceCode javascript">{ <span class="dt">pin</span>: <span class="dv">7</span>, <span class="dt">action</span>: <span class="st">&#39;getTemp&#39;</span> } (<span class="dv">24</span> bytes)</code></pre>
-<p>into</p>
-<pre class="sourceCode c"><code class="sourceCode c">p7a0 (<span class="dv">4</span> bytes)</code></pre>
-</section>
 <section id="parsing-in-c" class="slide level2">
 <h1>Parsing in c</h1>
 <pre class="sourceCode c"><code class="sourceCode c"><span class="kw">enum</span> ActionTypes {
@@ -468,10 +361,12 @@ boolean digital_pin_handler(TinyWebServer&amp; web_server) {
   <span class="co">// Get the action length</span>
   <span class="dt">const</span> <span class="dt">char</span>* action_str_len = web_server.get_header_value(<span class="st">&quot;X-Action-Len&quot;</span>);
   <span class="dt">int</span> len = atoi(action_str_len);
+  
   <span class="co">// Get the request data based on the length</span>
   <span class="dt">char</span>* data = (<span class="dt">char</span>*)malloc(len);
   <span class="kw">if</span> (data) memset(data, <span class="dv">0</span>, len);
   get_request_data(web_server, len, data);
+  
   <span class="co">// ...</span>
 };</code></pre>
 </section>
@@ -513,7 +408,7 @@ int i = <span class="dv">0</span>;
 
   byte present = sensor.reset();
   sensor.select(addr);  
-  sensor.write(<span class="bn">0xBE</span>); <span class="co">// Read Scratchpad</span>
+  sensor.write(<span class="bn">0xBE</span>);
 
   <span class="kw">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; <span class="dv">9</span>; i++) { data[i] = sensor.read(); }
 
@@ -561,6 +456,14 @@ int i = <span class="dv">0</span>;
       } 
     };
   });</code></pre>
+</section>
+<section id="learn-more" class="slide level2">
+<h1>Learn more</h1>
+<p><img src="images/ng-book.png" /> <img src="images/d3.png" /> <img src="images/rails.png" /></p>
+</section>
+<section id="thanks" class="slide level2">
+<h1>Thanks</h1>
+<h3 id="ari-lerner-fullstack.io-1">Ari Lerner, Fullstack.io</h3>
 </section>
 </div>
 
