@@ -7,11 +7,11 @@
 - Author of a few others ([D3 on Angular](http://leanpub/d3angularjs), [Riding Rails with AngularJS](https://leanpub.com/angularjs-rails))
 - Teacher at [HackReactor](http://hackreactor.com)
 - Cofounder of [Fullstack.io](http://fullstack.io)
-- Background in distributed computing and infrastructure (really)
+- Background in distributed computing and infrastructure
 
 ## What
 
-Let's prototype a temperature control system in less than 20 minutes (oversimplification) using the Arduino (an open-source hardware platform) and Angular (an awesome prototyping platform).
+Let's prototype a temperature control system in less than 20 minutes using the Arduino, an open-source hardware platform and Angular
 
 ## Arduino?
 
