@@ -24,7 +24,8 @@ Let's prototype a <span class="emp">$3.2 billion dollar</span> business in less 
 - Running an HTTP server on the arduino
 - Requesting the HTML from the arduino
 - Loading angular app
-- ...
+- Communicating to Angular from the Arduino
+- Communicating to the Arduino from Angular
 
 ## Running an HTTP server
 
@@ -163,7 +164,7 @@ boolean index_handler(TinyWebServer& web_server) {
 
 -------------------
 
-![](/images/load_in_browser.png)
+![](images/app.png)
 
 ## Command and Control
 
