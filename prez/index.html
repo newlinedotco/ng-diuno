@@ -15,7 +15,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <link rel="stylesheet" href="css/reveal.min.css">
-  <link rel="stylesheet" href="css/theme/moon.css" id="theme">
+  <link rel="stylesheet" href="css/theme/sky.css" id="theme">
 
 
 <!-- For syntax highlighting -->
@@ -116,14 +116,13 @@
 </section>
 <section id="enter-tinywebserver" class="slide level2">
 <h1>Enter TinyWebServer</h1>
-<p>Super simplification of the c code</p>
+<p>Enables simplification of the c HTTP server code</p>
 </section>
 <section class="slide level2">
 
 <pre class="sourceCode c"><code class="sourceCode c"><span class="ot">#include &lt;TinyWebServer.h&gt;</span>
 
-boolean index_handler(TinyWebServer&amp; web_server);
-
+<span class="co">// Index handler</span>
 boolean index_handler(TinyWebServer&amp; web_server) {
   web_server.print(F(<span class="st">&quot;&lt;html&gt;&lt;head&gt;&lt;title&gt;Web server&lt;/title&gt;&lt;/head&gt;&quot;</span>));
   web_server.print(F(<span class="st">&quot;&lt;body&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span>));
@@ -159,8 +158,8 @@ byte ip[] = { <span class="dv">192</span>, <span class="dv">168</span>, <span cl
 Ethernet.begin(mac, ip);</code></pre>
 <p><em>DHCP</em> is also supported</p>
 </section>
-<section id="but-wheres-the-angular" class="slide level2">
-<h1>But where's the angular?</h1>
+<section id="but-wheres-the-html" class="slide level2">
+<h1>But where's the HTML</h1>
 </section>
 <section id="options" class="slide level2">
 <h1>Options</h1>
@@ -183,7 +182,7 @@ boolean index_handler(TinyWebServer<span class="er">&amp;</span> web_server) {
   // ...
 };</code></pre>
 </section>
-<section id="but-wheres-the-angular-1" class="slide level2">
+<section id="but-wheres-the-angular" class="slide level2">
 <h1>But where's the Angular</h1>
 </section>
 <section class="slide level2">
@@ -490,7 +489,7 @@ int i = <span class="dv">0</span>;
     center: false,
 
   // available themes are in /css/theme
-      theme: Reveal.getQueryHash().theme || 'moon', 
+      theme: Reveal.getQueryHash().theme || 'sky', 
   
   // default/cube/page/concave/zoom/linear/fade/none
       transition: Reveal.getQueryHash().transition || 'linear',

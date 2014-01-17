@@ -61,15 +61,14 @@ void loop() {
 
 ## Enter TinyWebServer
 
-Super simplification of the c code
+Enables simplification of the c HTTP server code
 
 -----------------------
 
 ```c
 #include <TinyWebServer.h>
 
-boolean index_handler(TinyWebServer& web_server);
-
+// Index handler
 boolean index_handler(TinyWebServer& web_server) {
   web_server.print(F("<html><head><title>Web server</title></head>"));
   web_server.print(F("<body></body></html>"));
@@ -108,7 +107,7 @@ Ethernet.begin(mac, ip);
 
 _DHCP_ is also supported
 
-## But where's the angular?
+## But where's the HTML
 
 ## Options
 

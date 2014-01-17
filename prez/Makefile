@@ -1,5 +1,5 @@
 FORMAT=revealjs
-THEME=moon
+THEME=sky
 STYLE=default
 
 all:
