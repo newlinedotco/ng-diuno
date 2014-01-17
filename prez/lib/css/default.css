@@ -53,3 +53,6 @@ pre {
   overflow: auto;
   background-color: #111111;
 }
+pre code {
+  color: #ddd;
+}
