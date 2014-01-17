@@ -18,7 +18,7 @@ angular.module('myApp', [
   delete $httpProvider.defaults.headers.common['X-Requested-With'];
 }])
 .config(function($sceDelegateProvider, HOSTED_URL) {
-  $sceDelegateProvider.resourceUrlWhitelist(['self', HOSTED_URL() + '**']);
+  console.log($sceDelegateProvider.resourceUrlWhitelist(['self', HOSTED_URL() + '/views', HOSTED_URL() + '**']));
 })
 .config(function ($routeProvider) {
   $routeProvider

@@ -47,7 +47,7 @@ angular.module('myApp')
           .attr('x', r - 65);
 
         var scale = D3.scale.linear()
-          .domain([60,90])
+          .domain([65,85])
           .range([-180, 0]);
 
         var display = svg.append('text')

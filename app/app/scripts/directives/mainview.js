@@ -5,7 +5,7 @@ angular.module('myApp')
     return {
       templateUrl: HOSTED_URL() + '/views/home.html',
       restrict: 'A',
-      link: function(scope, ele) {
+      link: function(scope) {
         var redPin = 9,
             greenPin = 8,
             temp = 7;
@@ -38,8 +38,8 @@ angular.module('myApp')
             scope.loweringTemp = true;
             $timeout(function() {
               scope.loweringTemp = false;
-            }, 1500);
-          }, 400);
+            }, 800);
+          }, 100);
           Arduino.setPins([
             { pin: greenPin, value: 1 }
           ]).then(function() {
@@ -56,8 +56,8 @@ angular.module('myApp')
             scope.raisingTemp = true;
             $timeout(function() {
               scope.raisingTemp = false;
-            }, 1500);
-          }, 400);
+            }, 800);
+          }, 100);
           Arduino.setPins([
             { pin: redPin, value: 1 }
           ]).then(function() {

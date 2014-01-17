@@ -11,7 +11,7 @@
 
 ## What
 
-Let's prototype a <span class="emp">$3.2 billion dollar</span> business in less than 20 minutes (oversimplification) using the Arduino (an open-source hardware platform) and Angular (an awesome prototyping platform).
+Let's prototype a temperature control system in less than 20 minutes (oversimplification) using the Arduino (an open-source hardware platform) and Angular (an awesome prototyping platform).
 
 ## Arduino?
 
@@ -162,14 +162,10 @@ boolean index_handler(TinyWebServer& web_server) {
 })();
 ```
 
--------------------
-
-![](images/app.png)
-
 ## Command and Control
 
-* Arduino -> Browser (√)
-* Browser -> Angular (...)
+* Arduino -> Angular (√)
+* Angular -> Arduino (...)
 
 ## Expose the local ip to the browser
 
@@ -301,6 +297,17 @@ p7a0 (4 bytes)
     return str;
   };
 ```
+-------------
+
+```javascript
+{ pin: 7, action: 'getTemp' } (24 bytes)
+```
+
+to
+
+```c
+p7a0 (4 bytes)
+```
 
 ## Using it service
 
@@ -399,6 +406,12 @@ float getTemp(OneWire sensor){
 ## Interface
 
 Finally, we want to show the data in a meaningful, _sexy_ way... 
+
+## Demo
+
+-------------------
+
+![](images/app.png)
 
 ## d3
 

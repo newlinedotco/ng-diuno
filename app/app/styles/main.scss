@@ -51,16 +51,16 @@ $red: rgba(255,87,66, 0.9);
   text-align: center;
   i {
     font-size: 70px;
-    transition: all 600ms ease;
+    transition: all 300ms ease;
     font-weight: bolder;
   }
   #up.glow {
     text-shadow: 0 0px 10px $red;
-    transition: all 600ms ease;
+    transition: all 300ms ease;
   }
   #down.glow {
     text-shadow: 0 0px 10px $blue;
-    transition: all 600ms ease;
+    transition: all 300ms ease;
   }
 }
 

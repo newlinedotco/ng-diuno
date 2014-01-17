@@ -64,7 +64,7 @@
 </section>
 <section id="what" class="slide level2">
 <h1>What</h1>
-<p>Let's prototype a <span class="emp">$3.2 billion dollar</span> business in less than 20 minutes (oversimplification) using the Arduino (an open-source hardware platform) and Angular (an awesome prototyping platform).</p>
+<p>Let's prototype a temperature control system in less than 20 minutes (oversimplification) using the Arduino (an open-source hardware platform) and Angular (an awesome prototyping platform).</p>
 </section>
 <section id="arduino" class="slide level2">
 <h1>Arduino?</h1>
@@ -212,17 +212,11 @@ boolean index_handler(TinyWebServer<span class="er">&amp;</span> web_server) {
   <span class="ot">body</span>.<span class="fu">appendChild</span>(app);
 })();</code></pre>
 </section>
-<section class="slide level2">
-
-<figure>
-<img src="images/app.png" />
-</figure>
-</section>
 <section id="command-and-control" class="slide level2">
 <h1>Command and Control</h1>
 <ul>
-<li>Arduino -&gt; Browser (√)</li>
-<li>Browser -&gt; Angular (...)</li>
+<li>Arduino -&gt; Angular (√)</li>
+<li>Angular -&gt; Arduino (...)</li>
 </ul>
 </section>
 <section id="expose-the-local-ip-to-the-browser" class="slide level2">
@@ -338,6 +332,12 @@ bool pinsToString(TinyWebServer&amp; web_server) {
     <span class="kw">return</span> str;
   };</code></pre>
 </section>
+<section class="slide level2">
+
+<pre class="sourceCode javascript"><code class="sourceCode javascript">{ <span class="dt">pin</span>: <span class="dv">7</span>, <span class="dt">action</span>: <span class="st">&#39;getTemp&#39;</span> } (<span class="dv">24</span> bytes)</code></pre>
+<p>to</p>
+<pre class="sourceCode c"><code class="sourceCode c">p7a0 (<span class="dv">4</span> bytes)</code></pre>
+</section>
 <section id="using-it-service" class="slide level2">
 <h1>Using it service</h1>
 <pre class="sourceCode javascript"><code class="sourceCode javascript">setPins: <span class="kw">function</span>(pins) {
@@ -428,6 +428,15 @@ int i = <span class="dv">0</span>;
 <section id="interface" class="slide level2">
 <h1>Interface</h1>
 <p>Finally, we want to show the data in a meaningful, <em>sexy</em> way...</p>
+</section>
+<section id="demo" class="slide level2">
+<h1>Demo</h1>
+</section>
+<section class="slide level2">
+
+<figure>
+<img src="images/app.png" />
+</figure>
 </section>
 <section id="d3" class="slide level2">
 <h1>d3</h1>
