@@ -21,17 +21,16 @@ enum ActionTypes {
 };
 
 const char *HOST = "10.0.1.2:9000";
-Pin pins[11] = {
+
+const int numPins = 3;
+Pin pins[numPins+1] = {
   Pin(9, OUTPUT_T),
   Pin(8, OUTPUT_T),
   Pin(7, ONEWIRE),
 };
-
 OneWire ds(7);
 
 Client* subscriber;
-
-int numPins = 3;
 
 static uint8_t mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
@@ -56,18 +55,14 @@ boolean pins_handler(TinyWebServer& web_server) {
   web_server.send_error_code(200);
   web_server.send_content_type("application/javascript");
   web_server.end_headers();
-
   pinsToString(web_server);
   return true;
 }
 
-// POST /pins/digital
+// POST /pins/update
 boolean digital_pin_handler(TinyWebServer& web_server) {
-    const char* length_str = web_server.get_header_value("Content-Length");
-    int len = atoi(length_str);
-
     const char* action_str_len = web_server.get_header_value("X-Action-Len");
-    len = atoi(action_str_len);
+    int len = atoi(action_str_len);
 
     char* data = (char*)malloc(len);
     if (data) memset(data, 0, len);
@@ -76,7 +71,7 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
     // DIGITAL
 #if DEBUG
     Serial.print(F("digital_pin_handler: "));
-    Serial.print(data);// << "JSON data ->" << data << "<-\n";
+    Serial.print(data);
     Serial.print(F(" ("));
     Serial.print(len);
     Serial.print(F(")\n"));
@@ -173,7 +168,7 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
 }
 
 TinyWebServer::PathHandler handlers[] = {
-  {"/pins/digital", TinyWebServer::POST, &digital_pin_handler},
+  {"/pins/update", TinyWebServer::POST, &digital_pin_handler},
   {"/pins", TinyWebServer::GET, &pins_handler},
   {"/", TinyWebServer::GET, &index_handler },
   {NULL},
@@ -338,20 +333,12 @@ bool pinsToString(TinyWebServer& web_server) {
 bool pinToString(TinyWebServer& web_server, int pin_number) {
   UpdatePinsState();
 
-  // web_server << F("{\"pins\": ");
-  // web_server << F("{\"digital\":[");
-  int len = numPins;
   Pin *p = select_pin(pin_number);
-  // for(int i=0; i<len; i++){
-    // digitalPins[i]
-    web_server << F("{\"pin\":");
-    web_server << p->getPin();
-    web_server << F(",\"value\":");
-    web_server << p->getCurrentValue();
-    web_server << F("}");
-  // }
-  // web_server << F("}");
-  // web_server << F("}");
+  web_server.print(F("{\"pin\":"));
+  web_server.print(p->getPin());
+  web_server.print(F(",\"value\":"));
+  web_server.print(p->getCurrentValue());
+  web_server.print(F("}"));
   return true;
 }
 
@@ -394,7 +381,7 @@ void parse_path_string(const char* cStr, int size, char** messages) {
 
 /*
 *   Read the remaining data from a request
-*   based upon the 'Content-Length' header
+*   based upon the 'X-Action-Len' header
 */
 void get_request_data(TinyWebServer& web_server, int length_str, char* str)
 {

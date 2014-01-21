@@ -27,7 +27,6 @@ angular.module('myApp')
               var pins = data.pins;
               var pin = selectPin(temp, pins);
               scope.temperature = Math.round(pin.value * 100) / 100;
-              // scope.temperature = Math.round(Math.random() * 100);
               $timeout(poll, 1000);
             });
           })();

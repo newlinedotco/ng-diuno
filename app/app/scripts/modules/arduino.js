@@ -32,7 +32,7 @@ angular.module('fsArduino', [])
       var strAction = actionifyPins(pins);
       return $http({
         method: 'POST',
-        url: ARDUINO_URL + '/pins/digital',
+        url: ARDUINO_URL + '/pins/update',
         data: strAction,
         headers: {'X-Action-Len': strAction.length}
       }).then(function(data) {
