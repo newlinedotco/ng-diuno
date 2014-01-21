@@ -1,11 +1,8 @@
 #include <SPI.h>
-// #include <Ardunio.h>
 #include <Ethernet.h>
 #include <Flash.h>
-// #include <SD.h>
-// #include <string.h>
+#include <SD.h>
 #include <TinyWebServer.h>
-#include <aJSON.h>
 #include <OneWire.h>
 #include "./pin.h"
 
@@ -14,11 +11,8 @@
 boolean file_handler(TinyWebServer& web_server);
 boolean index_handler(TinyWebServer& web_server);
 boolean pins_handler(TinyWebServer& web_server);
-boolean subscribe_handler(TinyWebServer& web_server);
-// boolean setup_handler(TinyWebServer& web_server);
 boolean digital_pin_handler(TinyWebServer& web_server);
-// boolean analog_pin_handler(TinyWebServer& web_server);
-// String parse_path_string(String pathstring, int size);
+// Helpers
 void parse_path_string(const char* str, int size, char **messages);
 void get_request_data(TinyWebServer &web_server, char *str);
 
@@ -26,7 +20,7 @@ enum ActionTypes {
   GETTEMP
 };
 
-const char *HOST = "192.168.0.88:9000";
+const char *HOST = "10.0.1.2:9000";
 Pin pins[11] = {
   Pin(9, OUTPUT_T),
   Pin(8, OUTPUT_T),
@@ -41,10 +35,10 @@ int numPins = 3;
 
 static uint8_t mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
-byte ip[] = { 192, 168, 0, 67 };
+byte ip[] = { 10, 0, 1, 32 };
 
 boolean index_handler(TinyWebServer& web_server) {
-  web_server.print(F("<html><head><title>Web server</title></head>"));
+  web_server.print(F("<html><head><title>Temperature sensor</title></head>"));
   web_server.print(F("<body>"));
   web_server.print(F("<script>window.ip=\""));
   web_server.print(ip_to_str(ip));
@@ -186,7 +180,6 @@ TinyWebServer::PathHandler handlers[] = {
 };
 
 const char* headers[] = {
-  "Content-Length",
   "X-Action-Len",
   NULL
 };
@@ -289,7 +282,9 @@ void setup() {
   // root.ls();
 
 #if DEBUG
-  Serial.print(F("Setting up the Ethernet card...\n"));
+  Serial.print(F("Setting up the Ethernet card at: "));
+  Serial.print(ip_to_str(ip));
+  Serial.print(F("\n"));
 #endif
   Ethernet.begin(mac, ip);
 
@@ -326,20 +321,17 @@ void UpdatePinsState() {
 */
 bool pinsToString(TinyWebServer& web_server) {
   UpdatePinsState();
-
-  web_server << F("{\"pins\":[");
+  web_server.print(F("{\"pins\":["));
   int len = numPins;
   for(int i=0; i<len; i++){
-    // digitalPins[i]
-    web_server << F("{\"pin\":");
-    web_server << pins[i].getPin();
-    web_server << F(",\"value\":");
-    web_server << pins[i].getState();
-    web_server << F("}");
-    if ((i+1) < len) web_server << F(",");
+    web_server.print(F("{\"pin\":"));
+    web_server.print(pins[i].getPin());
+    web_server.print(F(",\"value\":"));
+    web_server.print(pins[i].getState());
+    web_server.print(F("}"));
+    if ((i+1) < len) web_server.print(F(","));
   }
-  web_server << F("]}");
-  // web_server << F("}");
+  web_server.print(F("]}"));
   return true;
 }
 

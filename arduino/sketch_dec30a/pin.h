@@ -13,7 +13,6 @@ private:
   uint8_t _mode;
 
   float   _currentValue;
-  // PinSetting setting;
 public:
   Pin();
   Pin(uint8_t num, PinType type);
@@ -31,7 +30,6 @@ public:
 
   void InitializeState();
   void Print();
-  // Pin *newPin();
 };
 
 #endif

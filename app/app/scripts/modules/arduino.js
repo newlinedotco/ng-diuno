@@ -1,63 +1,45 @@
 'use strict';
 
 angular.module('fsArduino', [])
-.config(function($httpProvider) {
-  var interceptor = function() {
-    return {
-      'request': function(req) {
-        // req.data = JSON.stringify(req.data)+'\n';
-        return req;
-      }
-    };
-  };
-  $httpProvider.interceptors.push(interceptor);
-})
-.provider('Arduino', function() {
+.constant('ARDUINO_URL', 'http://' + window.ip)
+.factory('Arduino', function(ARDUINO_URL, $http) {
 
-  var rootUrl = window.ip ? 'http://' + window.ip : 'http://192.168.0.67';
-
-  this.setRootUrl = function(u) {
-    rootUrl = u || rootUrl;
+  var actions = {
+    'getTemp': 0
   };
 
-  this.$get = function($q, $http) {
-    var actions = {
-      'getTemp': 0
-    };
-
-    var actionifyPins = function(pins) {
-      var str = '';
-      for (var i = 0; i < pins.length; i++) {
-        var p = pins[i];
-        str += 'p' + p.pin;
-        if (typeof(p.mode) !== 'undefined') {str += 'm' + p.mode;}
-        if (typeof(p.value) !== 'undefined') {str += 'v' + p.value;}
-        if (typeof(p.action) !== 'undefined') {str += 'a' + actions[p.action];}
-      }
-      return str;
-    };
-    var service = {
-      getPins: function() {
-        return $http({
-          method: 'GET',
-          url: rootUrl + '/pins'
-        }).then(function(data) {
-          return data.data;
-        });
-      },
-      setPins: function(pins) {
-        var strAction = actionifyPins(pins);
-        return $http({
-          method: 'POST',
-          url: rootUrl + '/pins/digital',
-          data: strAction,
-          headers: {'X-Action-Len': strAction.length}
-        }).then(function(data) {
-          return data.data;
-        });
-      }
-    };
-
-    return service;
+  var actionifyPins = function(pins) {
+    var str = '';
+    for (var i = 0; i < pins.length; i++) {
+      var p = pins[i];
+      str += 'p' + p.pin;
+      if (typeof(p.mode) !== 'undefined') {str += 'm' + p.mode;}
+      if (typeof(p.value) !== 'undefined') {str += 'v' + p.value;}
+      if (typeof(p.action) !== 'undefined') {str += 'a' + actions[p.action];}
+    }
+    return str;
   };
+  var service = {
+    getPins: function() {
+      return $http({
+        method: 'GET',
+        url: ARDUINO_URL + '/pins'
+      }).then(function(data) {
+        return data.data;
+      });
+    },
+    setPins: function(pins) {
+      var strAction = actionifyPins(pins);
+      return $http({
+        method: 'POST',
+        url: ARDUINO_URL + '/pins/digital',
+        data: strAction,
+        headers: {'X-Action-Len': strAction.length}
+      }).then(function(data) {
+        return data.data;
+      });
+    }
+  };
+
+  return service;
 });

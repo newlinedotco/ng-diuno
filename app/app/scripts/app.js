@@ -1,8 +1,7 @@
 'use strict';
 
 angular.module('myApp', [
-  'fsArduino',
-  'ngRoute'
+  'fsArduino'
 ])
 .constant('HOSTED_URL', function() {
   try {
@@ -13,20 +12,9 @@ angular.module('myApp', [
     return 'http://localhost:9000';
   }
 })
-.config(['$httpProvider', function($httpProvider) {
-  $httpProvider.defaults.useXDomain = true;
-  delete $httpProvider.defaults.headers.common['X-Requested-With'];
-}])
 .config(function($sceDelegateProvider, HOSTED_URL) {
-  console.log($sceDelegateProvider.resourceUrlWhitelist(['self', HOSTED_URL() + '/views', HOSTED_URL() + '**']));
-})
-.config(function ($routeProvider) {
-  $routeProvider
-    .when('/', {
-      templateUrl: 'views/main.html',
-      controller: 'MainCtrl'
-    })
-    .otherwise({
-      redirectTo: '/'
-    });
+  $sceDelegateProvider.resourceUrlWhitelist([
+    'self',
+    HOSTED_URL() + '**'
+  ]);
 });

@@ -2,7 +2,7 @@
 
 (function() {
 
-  var scriptTag = document.getElementsByTagName('script')[1];
+  var scriptTag = document.getElementById('appscript');
   var matches = scriptTag.src.match(/^http[s]?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
   var host = matches[0];
   var body  = document.getElementsByTagName('body')[0];
@@ -28,18 +28,17 @@
   createLinkTag('bower_components/ionic/dist/css/ionic.min.css');
   createLinkTag('styles/main.css');
 
+  createScriptTag('bower_components/angular/angular.js');
+  createScriptTag('bower_components/angular-route/angular-route.js');
+  createScriptTag('bower_components/d3/d3.min.js');
+
   var arr = [
     'scripts/modules/arduino.js',
     'scripts/app.js',
-    'scripts/controllers/main.js',
     'scripts/services/d3.js',
     'scripts/directives/mainview.js',
     'scripts/directives/temperatureGauge.js'
   ];
-
-  createScriptTag('bower_components/angular/angular.js');
-  createScriptTag('bower_components/angular-route/angular-route.js');
-  createScriptTag('bower_components/d3/d3.min.js');
 
   arr.forEach(function(src) {
     createScriptTag(src);

@@ -4,13 +4,6 @@
 #include <OneWire.h>
 #include "./pin.h"
 
-// Pin* Pin::newPin()
-// {
-//   Pin* pin = (Pin*)malloc(sizeof(Pin));
-//   if (pin) memset(pin, 0, sizeof(pin));
-//   return pin;
-// }
-
 Pin::Pin()             { _pin = 0; };
 Pin::Pin(uint8_t num, PinType type)  { 
   _pin = num; 
@@ -47,7 +40,6 @@ float Pin::getState(){
 uint8_t Pin::setState(uint8_t state) {
   digitalWrite(_pin, state);
   _digitalState = state;
-  // _digitalState = digitalRead(_pin)
   return _digitalState;
 }
 uint8_t Pin::getPin()           { return _pin; }
@@ -70,6 +62,4 @@ void Pin::Print() {
   Serial << F("Pin \n");
   Serial << F("\tPinNumber: ") <<    _pin << "\n";
   Serial << F("\tDigitalState: ") << _digitalState << "\n";
-  // Serial << "\tType: " <<         GetType() << "\n";
-  // Serial << "\tSetting: " <<      GetIO() << "\n";
 }
