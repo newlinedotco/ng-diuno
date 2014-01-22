@@ -16,26 +16,31 @@ boolean digital_pin_handler(TinyWebServer& web_server);
 void parse_path_string(const char* str, int size, char **messages);
 void get_request_data(TinyWebServer &web_server, char *str);
 
+// Types of actions our Arduino can take
 enum ActionTypes {
   GETTEMP
 };
 
+// Hardcoded host where the angular files are stored
 const char *HOST = "10.0.1.2:9000";
 
+// Pins we're interested in using
 const int numPins = 3;
-Pin pins[numPins+1] = {
+Pin pins[numPins] = {
   Pin(9, OUTPUT_T),
   Pin(8, OUTPUT_T),
   Pin(7, ONEWIRE),
 };
+// Our OneWire interface (the temp sensor)
 OneWire ds(7);
 
-Client* subscriber;
-
+// Our mac address
 static uint8_t mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
+// Our static IP
 byte ip[] = { 10, 0, 1, 32 };
 
+// Send the GET / index.html
 boolean index_handler(TinyWebServer& web_server) {
   web_server.print(F("<html><head><title>Temperature sensor</title></head>"));
   web_server.print(F("<body>"));
@@ -86,7 +91,7 @@ boolean digital_pin_handler(TinyWebServer& web_server) {
 
     int i = 0;
     while(i < sLen) {
-
+      // If we run across
       if (data[i] == 'p') {
         // We are parsing a new pin
         pinInt = (int)(data[++i] - '0');
